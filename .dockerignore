@@ -1,4 +1,12 @@
-node_modules
-npm-debug.log
 configurations/scopes.json
+
+.git
 .github
+*Dockerfile*
+*docker-compose*
+node_modules
+*.log
+*.ps1
+*.cmd
+*.sh
+tests
