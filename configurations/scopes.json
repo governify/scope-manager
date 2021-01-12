@@ -1,0 +1,87 @@
+{
+    "development": [
+        {
+            "classId": "class01",
+            "identities": [],
+            "credentials": [],
+            "projects": [
+                {
+                    "projectId": "project01",
+                    "identities": [
+                        {
+                            "source": "github",
+                            "repository": "repo01",
+                            "repoOwner": "owner01"
+                        },
+                        {
+                            "source": "pivotal",
+                            "projectId": 1
+                        },
+                        {
+                            "source": "heroku",
+                            "projectId": "id1"
+                        },
+                        {
+                            "source": "travis"
+                        },
+                        {
+                            "source": "codeclimate"
+                        }
+                    ],
+                    "credentials": [
+                        {
+                          "source": "github",
+                          "apiKey": "githubToken"
+                        },
+                        {
+                          "source": "pivotal",
+                          "apiKey": "pivotalToken"
+                        },
+                        {
+                          "source": "heroku",
+                          "apiKey": "herokuToken"
+                        },
+                        {
+                          "source": "travis",
+                          "apiKey": "travisToken"
+                        },
+                        {
+                          "source": "codeclimate",
+                          "apiKey": "codeclimateToken"
+                        }
+                    ],
+                    "members": [
+                        {
+                            "memberId": 1,
+                            "identities": [
+                                {
+                                    "source": "github",
+                                    "username": "githubName1"
+                                },
+                                {
+                                    "source": "pivotal",
+                                    "username": "pivotalName1"
+                                }
+                            ],
+                            "credentials": []
+                        },
+                        {
+                            "memberId": 2,
+                            "identities": [
+                                {
+                                    "source": "github",
+                                    "username": "githubName2"
+                                },
+                                {
+                                    "source": "pivotal",
+                                    "username": "pivotalName2"
+                                }
+                            ],
+                            "credentials": []
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

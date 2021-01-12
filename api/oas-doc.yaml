@@ -1,0 +1,190 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Governify Scope Manager
+  description: >-
+    This is an OpenAPI Specification created by oas-wizard
+    (https://github.com/pafmon/oas-wizard)  
+  contact:
+    name: PabloFM
+    email: pablofm@us.es
+    url: 'http://www.isa.us.es'
+  license:
+    name: MIT
+    url: 'http://opensource.org/licenses/MIT'
+paths:
+  '/api/v1/scopes/development/courses':
+    get:
+      description: Asks for all the courses
+      operationId: getCourses
+      responses:
+        '200':
+          description: Courses scopes found
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorModel'
+  '/api/v1/scopes/development/{courseId}':
+    get:
+      description: Asks for all the scopes for a courseId
+      operationId: getCourse
+      parameters:
+        - name: courseId
+          in: path
+          description: courseId of a development scope
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Course scope found
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorModel'
+  '/api/v1/scopes/development/{courseId}/projects':
+    get:
+      description: Asks for all the projects scope from a given a courseId
+      operationId: getProjects
+      parameters:
+        - name: courseId
+          in: path
+          description: courseId of a development scope
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Project scopes found
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorModel'
+  '/api/v1/scopes/development/{courseId}/{projectId}':
+    get:
+      description: Asks for a project scope from a given courseId and projectId
+      operationId: getProject
+      parameters:
+        - name: courseId
+          in: path
+          description: courseId of a development scope
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          description: projectId of a course scope
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Project scope found
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorModel'
+  '/api/v1/scopes/development/{courseId}/{projectId}/members':
+    get:
+      description: Asks for all the member scopes from a given courseId and projectId
+      operationId: getMembers
+      parameters:
+        - name: courseId
+          in: path
+          description: courseId of a development scope
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          description: projectId of a course scope
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Member scopes found
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorModel'
+  '/api/v1/scopes/development/{courseId}/{projectId}/{memberId}':
+    get:
+      description: 'Asks for a member scope from a given courseId, projectId and memberId'
+      operationId: getMember
+      parameters:
+        - name: courseId
+          in: path
+          description: courseId of a development scope
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          description: projectId of a course scope
+          required: true
+          schema:
+            type: string
+        - name: memberId
+          in: path
+          description: memberId of a project scope
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Member scope found
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorModel'
+  '/api/v1/scopes/development/search':
+    post:
+      description: Search from a given SLA scope
+      operationId: searchScope
+      responses:
+        '200':
+          description: Successful search
+        '404':
+          description: Not Found
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorModel'
+      requestBody:
+        x-name: scope
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/scope'
+        description: Scope to search
+        required: true
+components:
+  schemas:
+    errorModel:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+    scope:
+      type: object
