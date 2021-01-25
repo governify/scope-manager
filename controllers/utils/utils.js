@@ -4,6 +4,7 @@ const fs = require('fs');
 const axios = require('axios');
 const mustache = require('mustache');
 mustache.escape = function (text) { return text; };
+const scopesGenerator = require('./scopesGenerator');
 
 let scopeObject;
 let authorizedTokens;
@@ -280,6 +281,12 @@ const isAuthorized = (token) => {
   }
 };
 
+// Scope generator
+
+const generateScope = (generationRequest) => {
+  return scopesGenerator.generateFromGithubList(generationRequest);
+};
+
 // Other methods
 const sendHelper = (res, scope) => {
   if (scope) {
@@ -323,4 +330,7 @@ exports.getMembersUnauth = getMembersUnauth;
 exports.getMemberUnauth = getMemberUnauth;
 
 exports.isAuthorized = isAuthorized;
+
+exports.generateScope = generateScope;
+
 exports.sendHelper = sendHelper;
