@@ -118,7 +118,6 @@ const generateFromGithubList = (generationRequest, substitute = false, branch = 
         });
       });
 
-
       promises.push(promise);
     }
 
@@ -137,17 +136,17 @@ const getInfoYaml = (url, branch) => {
     axios.get(url + branch + '/' + infoFilename).then((response) => {
       resolve(response);
     }).catch(err => {
-      if (branch !== "master") {
+      if (branch !== 'master') {
         resolve(getInfoYaml(url, 'master'));
       } else {
-        console.log(err)
+        console.log(err);
         resolve(undefined);
       }
     });
   });
-}
+};
 
-/*const getMissingInfo = (infoObject) => {
+/* const getMissingInfo = (infoObject) => {
   const missingAtributes = "";
 
   axios.get("https://raw.githubusercontent.com/governify/audited-project-template/main/info.yml").then((response) => {
@@ -156,6 +155,6 @@ const getInfoYaml = (url, branch) => {
 
     }
   });
-}*/
+} */
 
 exports.generateFromGithubList = generateFromGithubList;
