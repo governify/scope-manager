@@ -151,7 +151,7 @@ const getMissingAndValidationInfo = (infoObject) => {
     const missingAttributes = [];
     const wrongAttributes = [];
 
-    axios.get("https://raw.githubusercontent.com/governify/audited-project-template/main/info.yml").then((response) => {
+    axios.get('https://raw.githubusercontent.com/governify/audited-project-template/main/info.yml').then((response) => {
       const originalInfoObject = jsyaml.load(response.data).project;
 
       for (const key1 of Object.keys(originalInfoObject)) {
@@ -165,9 +165,9 @@ const getMissingAndValidationInfo = (infoObject) => {
                 for (const key3 of Object.keys(originalInfoObject[key1][key2])) {
                   const missingAndValidation = checkField(infoObject[key1][key2][key3], originalInfoObject[key1][key2][key3], 'identities.' + key2 + '.' + key3);
                   if (missingAndValidation === undefined) {
-                    missingAttributes.push('identities.' + key2 + '.' + key3)
+                    missingAttributes.push('identities.' + key2 + '.' + key3);
                   } else if (missingAndValidation !== null) {
-                    wrongAttributes.push(missingAndValidation)
+                    wrongAttributes.push(missingAndValidation);
                   }
                 }
               }
@@ -184,7 +184,7 @@ const getMissingAndValidationInfo = (infoObject) => {
       reject(err);
     });
   });
-}
+};
 
 const checkField = (field, validationRule, fieldLocation) => {
   if (field === undefined) {
@@ -197,13 +197,13 @@ const checkField = (field, validationRule, fieldLocation) => {
         }
         break;
       case 'number':
-        var numberRegex = /^[0-9]+$/
+        var numberRegex = /^[0-9]+$/;
         if (!numberRegex.test(field)) {
           return fieldLocation;
         }
         break;
       case 'url':
-        var urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/
+        var urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
         if (!urlRegex.test(field)) {
           return fieldLocation;
         }
@@ -219,7 +219,6 @@ const checkField = (field, validationRule, fieldLocation) => {
     }
   }
   return null;
-}
-
+};
 
 exports.generateFromGithubList = generateFromGithubList;
