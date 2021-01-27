@@ -3,7 +3,7 @@ const jsyaml = require('js-yaml');
 
 const githubRawUrl = 'https://raw.githubusercontent.com/';
 
-const infoFilename = 'info.test.yml';
+const infoFilename = 'info.yml';
 
 /*  generationRequest Example
 {
