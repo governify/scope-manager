@@ -283,6 +283,10 @@ const isAuthorized = (token) => {
 
 // Scope generator
 
+const checkInfoYml = (githubProjectsList) => {
+  return scopesGenerator.checkFromGithubList(githubProjectsList);
+};
+
 const generateScope = (generationRequest) => {
   return scopesGenerator.generateFromGithubList(generationRequest);
 };
@@ -331,6 +335,7 @@ exports.getMemberUnauth = getMemberUnauth;
 
 exports.isAuthorized = isAuthorized;
 
+exports.checkInfoYml = checkInfoYml;
 exports.generateScope = generateScope;
 
 exports.sendHelper = sendHelper;

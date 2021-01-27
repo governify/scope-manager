@@ -13,6 +13,233 @@ const infoFilename = 'info.test.yml';
     ]
 }
 */
+
+const checkFromGithubList = (checkRequest, branch = 'main') => {
+  /*eslint-disable */
+  return new Promise(async (resolve, reject) => {
+    /* eslint-enable */
+    const missingAndValidation = {};
+    const wrongAPIs = {};
+    const promises = [];
+
+    for (const repoURL of checkRequest.repoList) {
+      const githubOwner = repoURL.split('github.com/')[1].split('/')[0];
+      const githubRepo = repoURL.split('github.com/')[1].split('/')[1];
+
+      await getInfoYaml(githubRawUrl + githubOwner + '/' + githubRepo + '/', branch).then((response) => {
+        const infoJson = jsyaml.load(response.data).project;
+
+        // Missing and format
+        const missingAndValidationPromise = new Promise((resolve, reject) => {
+          getMissingAndValidationInfo(infoJson).then((projectValidation) => {
+            missingAndValidation[repoURL] = { ...projectValidation };
+            resolve();
+          }).catch(err => {
+            console.log(err);
+            resolve();
+          });
+        });
+        promises.push(missingAndValidationPromise);
+
+        // Invalid API values
+        const invalidAPIValuesPromise = new Promise((resolve, reject) => {
+          getWrongAPIValues(infoJson).then((projectValidation) => {
+            wrongAPIs[repoURL] = { ...projectValidation };
+            resolve();
+          }).catch(err => {
+            console.log(err);
+            resolve();
+          });
+        });
+        promises.push(invalidAPIValuesPromise);
+      });
+    }
+
+    Promise.all(promises).then(() => {
+      const finalResponse = { errorProjects: [] };
+      for (const project of Object.keys(missingAndValidation)) {
+        const errorProject = {};
+        errorProject.projectURL = project;
+        errorProject.errors = { ...missingAndValidation[project] };
+        errorProject.errors.invalidApiValues = wrongAPIs[project].invalidApiValues;
+        finalResponse.errorProjects.push(errorProject);
+      }
+      resolve(finalResponse);
+    }).catch(err => {
+      console.log(err);
+      reject(err);
+    });
+  });
+};
+
+// Missing and validation
+const getMissingAndValidationInfo = (infoObject) => {
+  return new Promise((resolve, reject) => {
+    const missingAttributes = [];
+    const wrongAttributes = [];
+
+    axios.get('https://raw.githubusercontent.com/governify/audited-project-template/main/info.yml').then((response) => {
+      const originalInfoObject = jsyaml.load(response.data).project;
+
+      for (const key1 of Object.keys(originalInfoObject)) {
+        switch (key1) {
+          case 'members':
+          case 'identities':
+            if (infoObject[key1] === undefined) {
+              missingAttributes.push(key1);
+            } else {
+              for (const key2 of Object.keys(infoObject[key1])) {
+                for (const key3 of Object.keys(originalInfoObject[key1][key2])) {
+                  const missingAndValidation = checkField(infoObject[key1][key2][key3], originalInfoObject[key1][key2][key3], 'identities.' + key2 + '.' + key3);
+                  if (missingAndValidation === undefined) {
+                    missingAttributes.push('identities.' + key2 + '.' + key3);
+                  } else if (missingAndValidation !== null) {
+                    wrongAttributes.push(missingAndValidation);
+                  }
+                }
+              }
+            }
+            break;
+          default:
+            if (infoObject[key1] === undefined) {
+              missingAttributes.push(key1);
+            }
+        }
+      }
+      resolve({ missingValues: missingAttributes, wrongFormatValues: wrongAttributes });
+    }).catch(err => {
+      reject(err);
+    });
+  });
+};
+
+const checkField = (field, validationRule, fieldLocation) => {
+  if (field === undefined) {
+    return undefined;
+  } else {
+    switch (validationRule) {
+      case 'string':
+        if (field === '') {
+          return fieldLocation;
+        }
+        break;
+      case 'number':
+        /*eslint-disable */
+        const numberRegex = /^[0-9]+$/;
+        /* eslint-enable */
+        if (!numberRegex.test(field)) {
+          return fieldLocation;
+        }
+        break;
+      case 'url':
+        /*eslint-disable */
+        const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+        /* eslint-enable */
+        if (!urlRegex.test(field)) {
+          return fieldLocation;
+        }
+        break;
+      case 'email':
+        /*eslint-disable */
+        let emailRegex = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/;
+        /* eslint-enable */
+        if (!emailRegex.test(field)) {
+          return fieldLocation;
+        }
+        break;
+      default:
+        return 'unknownValidationRule(' + validationRule + ')-' + fieldLocation;
+    }
+  }
+  return null;
+};
+
+// Wrong values
+const getWrongAPIValues = (infoYml) => {
+  return new Promise((resolve, reject) => {
+    const wrongAPIs = [];
+    const promises = [];
+    // Pivotal
+    if (infoYml.identities.pivotal) {
+      const pivotalPromise = new Promise((resolve, reject) => {
+        existsRequest(infoYml.identities.pivotal.url).then(exists => {
+          if (!exists) {
+            wrongAPIs.push('infoYml.identities.pivotal.url');
+          }
+          resolve();
+        }).catch(err => {
+          console.log(err);
+          wrongAPIs.push('infoYml.identities.pivotal.url');
+          resolve();
+        });
+      });
+      promises.push(pivotalPromise);
+    }
+
+    // Heroku
+    /* if(infoYml.identities.heroku && infoYml.identities.heroku.url) {
+      const herokuPromise = new Promise((resolve,reject) => {
+        const originalURL = infoYml.identities.heroku.url;
+        const url = 'https://api.heroku.com/apps/' + originalURL.split('/')[originalURL.split('/').length - 1]
+        existsRequest(url).then(exists =>{
+          if(!exists){
+            wrongAPIs.push('infoYml.identities.heroku.url');
+          }
+          resolve();
+        }).catch(err => {
+          console.log(err);
+          wrongAPIs.push('infoYml.identities.heroku.url');
+          resolve();
+        });
+      });
+      promises.push(herokuPromise);
+    } */
+
+    // GithubUsername
+    for (const member of Object.keys(infoYml.members)) {
+      if (infoYml.members[member].githubUsername) {
+        const githubUsernamePromise = new Promise((resolve, reject) => {
+          existsRequest('https://github.com/' + infoYml.members[member].githubUsername).then(exists => {
+            if (!exists) {
+              wrongAPIs.push('infoYml.members.' + member + '.githubUsername');
+            }
+            resolve();
+          }).catch(err => {
+            console.log(err);
+            wrongAPIs.push('infoYml.members.' + member + '.githubUsername');
+            resolve();
+          });
+        });
+
+        promises.push(githubUsernamePromise);
+      }
+    }
+
+    Promise.all(promises).then(() => {
+      resolve({ invalidApiValues: wrongAPIs });
+    }).catch(err => {
+      console.log(err);
+      reject(err);
+    });
+  });
+};
+
+const existsRequest = (url) => {
+  return new Promise((resolve, reject) => {
+    axios.get(url).then((response) => {
+      if (response.status === 404) {
+        resolve(false);
+      } else {
+        resolve(true);
+      }
+    }).catch(() => {
+      resolve(false);
+    });
+  });
+};
+
+/// ////////////////////////////////////////////////////////////////////////////////////////////
+
 const generateFromGithubList = (generationRequest, substitute = false, branch = 'main') => {
   return new Promise((resolve, reject) => {
     const base = {
@@ -146,79 +373,5 @@ const getInfoYaml = (url, branch) => {
   });
 };
 
-const getMissingAndValidationInfo = (infoObject) => {
-  return new Promise((resolve, reject) => {
-    const missingAttributes = [];
-    const wrongAttributes = [];
-
-    axios.get('https://raw.githubusercontent.com/governify/audited-project-template/main/info.yml').then((response) => {
-      const originalInfoObject = jsyaml.load(response.data).project;
-
-      for (const key1 of Object.keys(originalInfoObject)) {
-        switch (key1) {
-          case 'members':
-          case 'identities':
-            if (infoObject[key1] === undefined) {
-              missingAttributes.push(key1);
-            } else {
-              for (const key2 of Object.keys(infoObject[key1])) {
-                for (const key3 of Object.keys(originalInfoObject[key1][key2])) {
-                  const missingAndValidation = checkField(infoObject[key1][key2][key3], originalInfoObject[key1][key2][key3], 'identities.' + key2 + '.' + key3);
-                  if (missingAndValidation === undefined) {
-                    missingAttributes.push('identities.' + key2 + '.' + key3);
-                  } else if (missingAndValidation !== null) {
-                    wrongAttributes.push(missingAndValidation);
-                  }
-                }
-              }
-            }
-            break;
-          default:
-            if (infoObject[key1] === undefined) {
-              missingAttributes.push(key1);
-            }
-        }
-      }
-      resolve({ missingAttributes: missingAttributes, wrongAttributes: wrongAttributes });
-    }).catch(err => {
-      reject(err);
-    });
-  });
-};
-
-const checkField = (field, validationRule, fieldLocation) => {
-  if (field === undefined) {
-    return undefined;
-  } else {
-    switch (validationRule) {
-      case 'string':
-        if (field === '') {
-          return fieldLocation;
-        }
-        break;
-      case 'number':
-        var numberRegex = /^[0-9]+$/;
-        if (!numberRegex.test(field)) {
-          return fieldLocation;
-        }
-        break;
-      case 'url':
-        var urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
-        if (!urlRegex.test(field)) {
-          return fieldLocation;
-        }
-        break;
-      case 'email':
-        var emailRegex = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/;
-        if (!emailRegex.test(field)) {
-          return fieldLocation;
-        }
-        break;
-      default:
-        return 'unknownValidationRule(' + validationRule + ')-' + fieldLocation;
-    }
-  }
-  return null;
-};
-
+exports.checkFromGithubList = checkFromGithubList;
 exports.generateFromGithubList = generateFromGithubList;
