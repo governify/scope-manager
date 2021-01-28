@@ -32,31 +32,36 @@ const checkFromGithubList = (checkRequest, branch = 'main') => {
             missingAndValidation[repoURL] = { missingValues: ['Github Repo not valid or Info.yml file not found!'], wrongFormatValues: [] };
             wrongAPIs[repoURL] = { invalidApiValues: [] };
           } else {
-            const infoJson = jsyaml.load(getInfoYamlResponse.data).project;
+            try {
+              const infoJson = jsyaml.load(getInfoYamlResponse.data).project;
 
-            // Missing and format
-            const missingAndValidationPromise = new Promise((resolve, reject) => {
-              getMissingAndValidationInfo(infoJson).then((projectValidation) => {
-                missingAndValidation[repoURL] = { ...projectValidation };
-                resolve();
-              }).catch(err => {
-                console.log(err);
-                resolve();
+              // Missing and format
+              const missingAndValidationPromise = new Promise((resolve, reject) => {
+                getMissingAndValidationInfo(infoJson).then((projectValidation) => {
+                  missingAndValidation[repoURL] = { ...projectValidation };
+                  resolve();
+                }).catch(err => {
+                  console.log(err);
+                  resolve();
+                });
               });
-            });
-            promises.push(missingAndValidationPromise);
+              promises.push(missingAndValidationPromise);
 
-            // Invalid API values
-            const invalidAPIValuesPromise = new Promise((resolve, reject) => {
-              getWrongAPIValues(infoJson).then((projectValidation) => {
-                wrongAPIs[repoURL] = { ...projectValidation };
-                resolve();
-              }).catch(err => {
-                console.log(err);
-                resolve();
+              // Invalid API values
+              const invalidAPIValuesPromise = new Promise((resolve, reject) => {
+                getWrongAPIValues(infoJson).then((projectValidation) => {
+                  wrongAPIs[repoURL] = { ...projectValidation };
+                  resolve();
+                }).catch(err => {
+                  console.log(err);
+                  resolve();
+                });
               });
-            });
-            promises.push(invalidAPIValuesPromise);
+              promises.push(invalidAPIValuesPromise);
+            } catch (err) {
+              missingAndValidation[repoURL] = { missingValues: [], wrongFormatValues: ['Not valid info.yml format. Check yaml syntax!'] };
+              wrongAPIs[repoURL] = { invalidApiValues: [] };
+            }
           }
         });
       }
