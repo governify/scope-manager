@@ -315,6 +315,21 @@ const sendHelper = (res, scope) => {
   }
 };
 
+const sendHelper2 = (res, content, code) => {
+  if (code === '200') {
+    res.send({
+      code: code,
+      message: 'Scope returned',
+      scope: content
+    });
+  } else {
+    res.send({
+      code: code,
+      message: content
+    });
+  }
+};
+
 init();
 
 exports.getCourses = getCourses;
@@ -339,3 +354,4 @@ exports.checkInfoYml = checkInfoYml;
 exports.generateScope = generateScope;
 
 exports.sendHelper = sendHelper;
+exports.sendHelper2 = sendHelper2;

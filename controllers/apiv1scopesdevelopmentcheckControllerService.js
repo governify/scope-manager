@@ -3,10 +3,14 @@
 const utils = require('./utils/utils');
 
 module.exports.checkInfo = function checkInfo (req, res, next) {
-  utils.checkInfoYml(req.scope.value).then(response => {
-    utils.sendHelper(res, response);
-  }).catch(err => {
-    console.log(err);
-    utils.sendHelper(err.message, 'error');
-  });
+  if (!res.req.body || JSON.stringify(res.req.body) === '{}') {
+    utils.sendHelper2(res, 'Request body is empty', 400);
+  } else {
+    utils.checkInfoYml(req.scope.value).then(response => {
+      utils.sendHelper2(res, response, 200);
+    }).catch(err => {
+      console.log(err);
+      utils.sendHelper2(res, 'Internal Server Error', 500);
+    });
+  }
 };
