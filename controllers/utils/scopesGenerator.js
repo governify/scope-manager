@@ -18,57 +18,61 @@ const checkFromGithubList = (checkRequest, branch = 'main') => {
   /*eslint-disable */
   return new Promise(async (resolve, reject) => {
     /* eslint-enable */
-    const missingAndValidation = {};
-    const wrongAPIs = {};
-    const promises = [];
+    try {
+      const missingAndValidation = {};
+      const wrongAPIs = {};
+      const promises = [];
 
-    for (const repoURL of checkRequest.repoList) {
-      const githubOwner = repoURL.split('github.com/')[1].split('/')[0];
-      const githubRepo = repoURL.split('github.com/')[1].split('/')[1];
+      for (const repoURL of checkRequest.repoList) {
+        const githubOwner = repoURL.split('github.com/')[1].split('/')[0];
+        const githubRepo = repoURL.split('github.com/')[1].split('/')[1];
 
-      await getInfoYaml(githubRawUrl + githubOwner + '/' + githubRepo + '/', branch).then((response) => {
-        const infoJson = jsyaml.load(response.data).project;
+        await getInfoYaml(githubRawUrl + githubOwner + '/' + githubRepo + '/', branch).then((getInfoYamlResponse) => {
+          const infoJson = jsyaml.load(getInfoYamlResponse.data).project;
 
-        // Missing and format
-        const missingAndValidationPromise = new Promise((resolve, reject) => {
-          getMissingAndValidationInfo(infoJson).then((projectValidation) => {
-            missingAndValidation[repoURL] = { ...projectValidation };
-            resolve();
-          }).catch(err => {
-            console.log(err);
-            resolve();
+          // Missing and format
+          const missingAndValidationPromise = new Promise((resolve, reject) => {
+            getMissingAndValidationInfo(infoJson).then((projectValidation) => {
+              missingAndValidation[repoURL] = { ...projectValidation };
+              resolve();
+            }).catch(err => {
+              console.log(err);
+              resolve();
+            });
           });
-        });
-        promises.push(missingAndValidationPromise);
+          promises.push(missingAndValidationPromise);
 
-        // Invalid API values
-        const invalidAPIValuesPromise = new Promise((resolve, reject) => {
-          getWrongAPIValues(infoJson).then((projectValidation) => {
-            wrongAPIs[repoURL] = { ...projectValidation };
-            resolve();
-          }).catch(err => {
-            console.log(err);
-            resolve();
+          // Invalid API values
+          const invalidAPIValuesPromise = new Promise((resolve, reject) => {
+            getWrongAPIValues(infoJson).then((projectValidation) => {
+              wrongAPIs[repoURL] = { ...projectValidation };
+              resolve();
+            }).catch(err => {
+              console.log(err);
+              resolve();
+            });
           });
+          promises.push(invalidAPIValuesPromise);
         });
-        promises.push(invalidAPIValuesPromise);
-      });
-    }
-
-    Promise.all(promises).then(() => {
-      const finalResponse = { errorProjects: [] };
-      for (const project of Object.keys(missingAndValidation)) {
-        const errorProject = {};
-        errorProject.projectURL = project;
-        errorProject.errors = { ...missingAndValidation[project] };
-        errorProject.errors.invalidApiValues = wrongAPIs[project].invalidApiValues;
-        finalResponse.errorProjects.push(errorProject);
       }
-      resolve(finalResponse);
-    }).catch(err => {
-      console.log(err);
+
+      Promise.all(promises).then(() => {
+        const finalResponse = { errorProjects: [] };
+        for (const project of Object.keys(missingAndValidation)) {
+          const errorProject = {};
+          errorProject.projectURL = project;
+          errorProject.errors = { ...missingAndValidation[project] };
+          errorProject.errors.invalidApiValues = wrongAPIs[project].invalidApiValues;
+          finalResponse.errorProjects.push(errorProject);
+        }
+        resolve(finalResponse);
+      }).catch(err => {
+        console.log(err);
+        reject(err);
+      });
+    } catch (err) {
       reject(err);
-    });
+    }
   });
 };
 
@@ -86,13 +90,13 @@ const getMissingAndValidationInfo = (infoObject) => {
           case 'members':
           case 'identities':
             if (infoObject[key1] === undefined) {
-              missingAttributes.push(key1);
+              missingAttributes.push('Missing mandatory parameter: ' + key1);
             } else {
               for (const key2 of Object.keys(infoObject[key1])) {
                 for (const key3 of Object.keys(originalInfoObject[key1][key2])) {
                   const missingAndValidation = checkField(infoObject[key1][key2][key3], originalInfoObject[key1][key2][key3], 'identities.' + key2 + '.' + key3);
                   if (missingAndValidation === undefined) {
-                    missingAttributes.push('identities.' + key2 + '.' + key3);
+                    missingAttributes.push('Missing mandatory parameter: identities.' + key2 + '.' + key3);
                   } else if (missingAndValidation !== null) {
                     wrongAttributes.push(missingAndValidation);
                   }
@@ -102,7 +106,7 @@ const getMissingAndValidationInfo = (infoObject) => {
             break;
           default:
             if (infoObject[key1] === undefined) {
-              missingAttributes.push(key1);
+              missingAttributes.push('Missing mandatory parameter: ' + key1);
             }
         }
       }
@@ -120,7 +124,7 @@ const checkField = (field, validationRule, fieldLocation) => {
     switch (validationRule) {
       case 'string':
         if (field === '') {
-          return fieldLocation;
+          return 'Field cannot be empty: ' + fieldLocation;
         }
         break;
       case 'number':
@@ -128,7 +132,7 @@ const checkField = (field, validationRule, fieldLocation) => {
         const numberRegex = /^[0-9]+$/;
         /* eslint-enable */
         if (!numberRegex.test(field)) {
-          return fieldLocation;
+          return 'Field must be number: ' + fieldLocation;
         }
         break;
       case 'url':
@@ -136,7 +140,7 @@ const checkField = (field, validationRule, fieldLocation) => {
         const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
         /* eslint-enable */
         if (!urlRegex.test(field)) {
-          return fieldLocation;
+          return 'Field must be an URL: ' + fieldLocation;
         }
         break;
       case 'email':
@@ -144,7 +148,7 @@ const checkField = (field, validationRule, fieldLocation) => {
         let emailRegex = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/;
         /* eslint-enable */
         if (!emailRegex.test(field)) {
-          return fieldLocation;
+          return 'Field must be an email: ' + fieldLocation;
         }
         break;
       default:
@@ -162,14 +166,14 @@ const getWrongAPIValues = (infoYml) => {
     // Pivotal
     if (infoYml.identities.pivotal) {
       const pivotalPromise = new Promise((resolve, reject) => {
-        existsRequest(infoYml.identities.pivotal.url).then(exists => {
-          if (!exists) {
-            wrongAPIs.push('infoYml.identities.pivotal.url');
+        getStatusCode(infoYml.identities.pivotal.url).then(statusCode => {
+          if (statusCode !== 200) {
+            wrongAPIs.push('Wrong Url or private project: infoYml.identities.pivotal.url');
           }
           resolve();
         }).catch(err => {
           console.log(err);
-          wrongAPIs.push('infoYml.identities.pivotal.url');
+          wrongAPIs.push('Wrong Url or private project: infoYml.identities.pivotal.url');
           resolve();
         });
       });
@@ -177,36 +181,38 @@ const getWrongAPIValues = (infoYml) => {
     }
 
     // Heroku
-    /* if(infoYml.identities.heroku && infoYml.identities.heroku.url) {
-      const herokuPromise = new Promise((resolve,reject) => {
+    if (infoYml.identities.heroku && infoYml.identities.heroku.url) {
+      const herokuPromise = new Promise((resolve, reject) => {
         const originalURL = infoYml.identities.heroku.url;
-        const url = 'https://api.heroku.com/apps/' + originalURL.split('/')[originalURL.split('/').length - 1]
-        existsRequest(url).then(exists =>{
-          if(!exists){
-            wrongAPIs.push('infoYml.identities.heroku.url');
+        const url = 'https://api.heroku.com/apps/' + originalURL.split('/')[originalURL.split('/').length - 1];
+        getStatusCode(url, { Accept: 'application/vnd.heroku+json; version=3', Authorization: 'Bearer a65663c7-c9f1-4fad-8dac-22ff564fff21' }).then(statusCode => {
+          if (statusCode === 403) {
+            wrongAPIs.push('Forbidden access to Bluejay Auditor: infoYml.identities.heroku.url');
+          } else if (statusCode === 404) {
+            wrongAPIs.push('Wrong Url: infoYml.identities.heroku.url');
           }
           resolve();
         }).catch(err => {
           console.log(err);
-          wrongAPIs.push('infoYml.identities.heroku.url');
+          wrongAPIs.push('Wrong Url: infoYml.identities.heroku.url');
           resolve();
         });
       });
       promises.push(herokuPromise);
-    } */
+    }
 
     // GithubUsername
     for (const member of Object.keys(infoYml.members)) {
       if (infoYml.members[member].githubUsername) {
         const githubUsernamePromise = new Promise((resolve, reject) => {
-          existsRequest('https://github.com/' + infoYml.members[member].githubUsername).then(exists => {
-            if (!exists) {
-              wrongAPIs.push('infoYml.members.' + member + '.githubUsername');
+          getStatusCode('https://github.com/' + infoYml.members[member].githubUsername).then(statusCode => {
+            if (statusCode !== 200) {
+              wrongAPIs.push('Wrong Username: infoYml.members.' + member + '.githubUsername');
             }
             resolve();
           }).catch(err => {
             console.log(err);
-            wrongAPIs.push('infoYml.members.' + member + '.githubUsername');
+            wrongAPIs.push('Wrong Username: infoYml.members.' + member + '.githubUsername');
             resolve();
           });
         });
@@ -224,16 +230,12 @@ const getWrongAPIValues = (infoYml) => {
   });
 };
 
-const existsRequest = (url) => {
+const getStatusCode = (url, headers = {}) => {
   return new Promise((resolve, reject) => {
-    axios.get(url).then((response) => {
-      if (response.status === 404) {
-        resolve(false);
-      } else {
-        resolve(true);
-      }
-    }).catch(() => {
-      resolve(false);
+    axios.get(url, { headers: { ...headers } }).then((response) => {
+      resolve(response.status);
+    }).catch((err) => {
+      resolve(err.response.status);
     });
   });
 };
