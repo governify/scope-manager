@@ -185,7 +185,7 @@ const getWrongAPIValues = (infoYml) => {
       const herokuPromise = new Promise((resolve, reject) => {
         const originalURL = infoYml.identities.heroku.url;
         const url = 'https://api.heroku.com/apps/' + originalURL.split('/')[originalURL.split('/').length - 1];
-        getStatusCode(url, { Accept: 'application/vnd.heroku+json; version=3', Authorization: 'Bearer a65663c7-c9f1-4fad-8dac-22ff564fff21' }).then(statusCode => {
+        getStatusCode(url, { Accept: 'application/vnd.heroku+json; version=3', Authorization: 'Bearer ' + process.env.KEY_HEROKU }).then(statusCode => {
           if (statusCode === 403) {
             wrongAPIs.push('Forbidden access to Bluejay Auditor: infoYml.identities.heroku.url');
           } else if (statusCode === 404) {
