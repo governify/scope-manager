@@ -28,31 +28,36 @@ const checkFromGithubList = (checkRequest, branch = 'main') => {
         const githubRepo = repoURL.split('github.com/')[1].split('/')[1];
 
         await getInfoYaml(githubRawUrl + githubOwner + '/' + githubRepo + '/', branch).then((getInfoYamlResponse) => {
-          const infoJson = jsyaml.load(getInfoYamlResponse.data).project;
+          if (getInfoYamlResponse === undefined) {
+            missingAndValidation[repoURL] = { missingValues: ['Github Repo not valid or Info.yml file not found!'], wrongFormatValues: [] };
+            wrongAPIs[repoURL] = { invalidApiValues: [] };
+          } else {
+            const infoJson = jsyaml.load(getInfoYamlResponse.data).project;
 
-          // Missing and format
-          const missingAndValidationPromise = new Promise((resolve, reject) => {
-            getMissingAndValidationInfo(infoJson).then((projectValidation) => {
-              missingAndValidation[repoURL] = { ...projectValidation };
-              resolve();
-            }).catch(err => {
-              console.log(err);
-              resolve();
+            // Missing and format
+            const missingAndValidationPromise = new Promise((resolve, reject) => {
+              getMissingAndValidationInfo(infoJson).then((projectValidation) => {
+                missingAndValidation[repoURL] = { ...projectValidation };
+                resolve();
+              }).catch(err => {
+                console.log(err);
+                resolve();
+              });
             });
-          });
-          promises.push(missingAndValidationPromise);
+            promises.push(missingAndValidationPromise);
 
-          // Invalid API values
-          const invalidAPIValuesPromise = new Promise((resolve, reject) => {
-            getWrongAPIValues(infoJson).then((projectValidation) => {
-              wrongAPIs[repoURL] = { ...projectValidation };
-              resolve();
-            }).catch(err => {
-              console.log(err);
-              resolve();
+            // Invalid API values
+            const invalidAPIValuesPromise = new Promise((resolve, reject) => {
+              getWrongAPIValues(infoJson).then((projectValidation) => {
+                wrongAPIs[repoURL] = { ...projectValidation };
+                resolve();
+              }).catch(err => {
+                console.log(err);
+                resolve();
+              });
             });
-          });
-          promises.push(invalidAPIValuesPromise);
+            promises.push(invalidAPIValuesPromise);
+          }
         });
       }
 
@@ -173,7 +178,6 @@ const getWrongAPIValues = (infoYml) => {
           resolve();
         }).catch(err => {
           console.log(err);
-          wrongAPIs.push('Wrong Url or private project: infoYml.identities.pivotal.url');
           resolve();
         });
       });
@@ -190,11 +194,12 @@ const getWrongAPIValues = (infoYml) => {
             wrongAPIs.push('Forbidden access to Bluejay Auditor: infoYml.identities.heroku.url');
           } else if (statusCode === 404) {
             wrongAPIs.push('Wrong Url: infoYml.identities.heroku.url');
+          } else if (statusCode === 401) {
+            wrongAPIs.push('Wrong Heroku Credentials - Please, contact Governify administrator');
           }
           resolve();
         }).catch(err => {
           console.log(err);
-          wrongAPIs.push('Wrong Url: infoYml.identities.heroku.url');
           resolve();
         });
       });
@@ -212,7 +217,6 @@ const getWrongAPIValues = (infoYml) => {
             resolve();
           }).catch(err => {
             console.log(err);
-            wrongAPIs.push('Wrong Username: infoYml.members.' + member + '.githubUsername');
             resolve();
           });
         });
@@ -364,11 +368,11 @@ const getInfoYaml = (url, branch) => {
   return new Promise((resolve, reject) => {
     axios.get(url + branch + '/' + infoFilename).then((response) => {
       resolve(response);
-    }).catch(err => {
+    }).catch(() => {
       if (branch !== 'master') {
         resolve(getInfoYaml(url, 'master'));
       } else {
-        console.log(err);
+        console.log('Not found info.yml: ' + url + branch + '/' + infoFilename);
         resolve(undefined);
       }
     });
