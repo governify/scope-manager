@@ -24,12 +24,20 @@ const checkFromGithubList = (checkRequest, branch = 'main') => {
       const promises = [];
 
       for (const repoURL of checkRequest.repoList) {
-        const githubOwner = repoURL.split('github.com/')[1].split('/')[0];
-        const githubRepo = repoURL.split('github.com/')[1].split('/')[1];
+        let githubOwner, githubRepo;
+
+        try {
+          githubOwner = repoURL.split('github.com/')[1].split('/')[0];
+          githubRepo = repoURL.split('github.com/')[1].split('/')[1];
+        } catch (err) {
+          missingAndValidation[repoURL] = { missingValues: [], wrongFormatValues: ['Wrong URL, it should be a GitHub URL.'] };
+          wrongAPIs[repoURL] = { invalidApiValues: [] };
+          continue;
+        }
 
         await getInfoYaml(githubRawUrl + githubOwner + '/' + githubRepo + '/', branch).then((getInfoYamlResponse) => {
           if (getInfoYamlResponse === undefined) {
-            missingAndValidation[repoURL] = { missingValues: ['Github Repo not valid or Info.yml file not found!'], wrongFormatValues: [] };
+            missingAndValidation[repoURL] = { missingValues: ['Github Repo URL not valid or Info.yml file not found!'], wrongFormatValues: [] };
             wrongAPIs[repoURL] = { invalidApiValues: [] };
           } else {
             try {
