@@ -10,3 +10,7 @@ node_modules
 *.cmd
 *.sh
 tests
+
+# dotenv environment variables file
+.env
+.env.test

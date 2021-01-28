@@ -173,6 +173,52 @@ paths:
               $ref: '#/components/schemas/scope'
         description: Scope to search
         required: true
+  '/api/v1/scopes/development/generate':
+    post:
+      description: Generate scopes from a given github list of projects
+      operationId: generateScope
+      responses:
+        '200':
+          description: Successful generation
+        '500':
+          description: Internal Error
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorModel'
+      requestBody:
+        x-name: scope
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/scope'
+        description: Scope to search
+        required: true
+  '/api/v1/scopes/development/check':
+    post:
+      description: Check info.yml from a given github list of projects
+      operationId: checkInfo
+      responses:
+        '200':
+          description: Successful check
+        '500':
+          description: Internal Error
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorModel'
+      requestBody:
+        x-name: scope
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/scope'
+        description: Scope to search
+        required: true
 components:
   schemas:
     errorModel:

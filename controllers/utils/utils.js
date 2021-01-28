@@ -4,6 +4,7 @@ const fs = require('fs');
 const axios = require('axios');
 const mustache = require('mustache');
 mustache.escape = function (text) { return text; };
+const scopesGenerator = require('./scopesGenerator');
 
 let scopeObject;
 let authorizedTokens;
@@ -280,6 +281,16 @@ const isAuthorized = (token) => {
   }
 };
 
+// Scope generator
+
+const checkInfoYml = (githubProjectsList) => {
+  return scopesGenerator.checkFromGithubList(githubProjectsList);
+};
+
+const generateScope = (generationRequest) => {
+  return scopesGenerator.generateFromGithubList(generationRequest);
+};
+
 // Other methods
 const sendHelper = (res, scope) => {
   if (scope) {
@@ -304,6 +315,21 @@ const sendHelper = (res, scope) => {
   }
 };
 
+const sendHelper2 = (res, content, code) => {
+  if (code === '200') {
+    res.send({
+      code: code,
+      message: 'Scope returned',
+      scope: content
+    });
+  } else {
+    res.send({
+      code: code,
+      message: content
+    });
+  }
+};
+
 init();
 
 exports.getCourses = getCourses;
@@ -323,4 +349,9 @@ exports.getMembersUnauth = getMembersUnauth;
 exports.getMemberUnauth = getMemberUnauth;
 
 exports.isAuthorized = isAuthorized;
+
+exports.checkInfoYml = checkInfoYml;
+exports.generateScope = generateScope;
+
 exports.sendHelper = sendHelper;
+exports.sendHelper2 = sendHelper2;
