@@ -1,5 +1,6 @@
 const axios = require('axios');
 const jsyaml = require('js-yaml');
+const utils = require('./utils');
 
 const githubRawUrl = 'https://raw.githubusercontent.com/';
 
@@ -270,19 +271,16 @@ const getStatusCode = (url, headers = {}) => {
 // ------------------------------- Generation -------------------------------//
 const generateFromGithubList = (generationRequest) => {
   return new Promise((resolve, reject) => {
-    const base = {
-      development: [
-        {
-          classId: 'classId',
-          identities: [],
-          credentials: [],
-          projects: []
-        }
-      ]
-    };
+    const courseId = generationRequest.courseId;
+    let courseScope = utils.getCourse(courseId);
 
-    if (generationRequest.courseId) {
-      base.development[0].classId = generationRequest.courseId;
+    if (!courseScope) {
+      courseScope = {
+        classId: courseId,
+        identities: [],
+        credentials: [],
+        projects: []
+      };
     }
 
     const projects = [];
@@ -303,7 +301,7 @@ const generateFromGithubList = (generationRequest) => {
             const githubOwner = project.projectURL.split('github.com/')[1].split('/')[0];
             const githubRepo = project.projectURL.split('github.com/')[1].split('/')[1];
 
-            infoJson.projectId = base.development[0].classId + '-GH-' + githubOwner + '_' + githubRepo;
+            infoJson.projectId = courseId + '-GH-' + githubOwner + '_' + githubRepo;
 
             // Get Identities
             const identities = [
@@ -368,16 +366,40 @@ const generateFromGithubList = (generationRequest) => {
             delete infoJson.members; // Just for ordering the return object
             infoJson.members = members;
 
-            // Push and resolve
-            newProjectObject.newScope = { ...infoJson };
-            projects.push(newProjectObject);
+            // Obtain old scope
+            const oldScope = utils.getProject(courseId, infoJson.projectId);
+
+            if (JSON.stringify(oldScope) === JSON.stringify(infoJson)) {
+              projects.push({ ...project, errors: ['The is no new changes for this project scope.'], oldScope: { ...oldScope } });
+            } else {
+              oldScope && (newProjectObject.oldScope = { ...oldScope });
+              newProjectObject.newScope = { ...infoJson };
+              projects.push(newProjectObject);
+            }
           }
         } catch (err) {
           console.log(err);
         }
       }
 
-      // base.development[0].projects = projects;
+      // Substitution
+      for (const project of projects) {
+        if (project.newScope) {
+          if (project.oldScope) {
+            for (const courseIndex in courseScope.projects) {
+              if (courseScope.projects[courseIndex].projectId === project.newScope.projectId) {
+                courseScope.projects[courseIndex] = project.newScope;
+                break;
+              }
+            }
+          } else {
+            courseScope.projects.push(project.newScope);
+          }
+        }
+      }
+      utils.setCourseScope(courseScope, courseId);
+
+      // Return response
       resolve(projects);
     }).catch(err => {
       console.log(err);
