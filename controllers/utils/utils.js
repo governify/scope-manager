@@ -315,13 +315,14 @@ const sendHelper = (res, scope) => {
   }
 };
 
-const sendHelper2 = (res, content, code) => {
-  if (code === '200') {
-    res.send({
+const sendHelper2 = (res, content, code, contentName = 'scope') => {
+  if (code === 200) {
+    const sendObject = {
       code: code,
-      message: 'Scope returned',
-      scope: content
-    });
+      message: contentName + ' returned'
+    };
+    sendObject[contentName] = content;
+    res.send(sendObject);
   } else {
     res.send({
       code: code,

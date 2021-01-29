@@ -14,13 +14,15 @@ const infoFilename = 'info.yml';
 }
 */
 
-const checkFromGithubList = (checkRequest, branch = 'main') => {
+// ------------------------------- Check -------------------------------//
+const checkFromGithubList = (checkRequest) => {
   /*eslint-disable */
   return new Promise(async (resolve, reject) => {
     /* eslint-enable */
     try {
       const missingAndValidation = {};
       const wrongAPIs = {};
+      const infoYmlJson = {};
       const promises = [];
 
       for (const repoURL of checkRequest.repoList) {
@@ -35,13 +37,14 @@ const checkFromGithubList = (checkRequest, branch = 'main') => {
           continue;
         }
 
-        await getInfoYaml(githubRawUrl + githubOwner + '/' + githubRepo + '/', branch).then((getInfoYamlResponse) => {
+        await getInfoYaml(githubRawUrl + githubOwner + '/' + githubRepo + '/', 'main').then((getInfoYamlResponse) => {
           if (getInfoYamlResponse === undefined) {
             missingAndValidation[repoURL] = { missingValues: ['Github Repo URL not valid or Info.yml file not found!'], wrongFormatValues: [] };
             wrongAPIs[repoURL] = { invalidApiValues: [] };
           } else {
             try {
               const infoJson = jsyaml.load(getInfoYamlResponse.data).project;
+              infoYmlJson[repoURL] = infoJson;
 
               // Missing and format
               const missingAndValidationPromise = new Promise((resolve, reject) => {
@@ -75,13 +78,14 @@ const checkFromGithubList = (checkRequest, branch = 'main') => {
       }
 
       Promise.all(promises).then(() => {
-        const finalResponse = { errorProjects: [] };
+        const finalResponse = [];
         for (const project of Object.keys(missingAndValidation)) {
           const errorProject = {};
           errorProject.projectURL = project;
           errorProject.errors = { ...missingAndValidation[project] };
           errorProject.errors.invalidApiValues = wrongAPIs[project].invalidApiValues;
-          finalResponse.errorProjects.push(errorProject);
+          errorProject.infoYml = infoYmlJson[project];
+          finalResponse.push(errorProject);
         }
         resolve(finalResponse);
       }).catch(err => {
@@ -257,9 +261,9 @@ const getStatusCode = (url, headers = {}) => {
   });
 };
 
-/// ////////////////////////////////////////////////////////////////////////////////////////////
+// ------------------------------- Generation -------------------------------//
 
-const generateFromGithubList = (generationRequest, substitute = false, branch = 'main') => {
+const generateFromGithubList = (generationRequest, branch = 'main') => {
   return new Promise((resolve, reject) => {
     const base = {
       development: [
@@ -278,6 +282,13 @@ const generateFromGithubList = (generationRequest, substitute = false, branch = 
 
     const projects = [];
     const promises = [];
+
+    checkFromGithubList(generationRequest).then((projects) => {
+
+    }).catch(err => {
+      console.log(err);
+      reject(err);
+    });
 
     for (const repoURL of generationRequest.repoList) {
       const githubOwner = repoURL.split('github.com/')[1].split('/')[0];
