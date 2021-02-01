@@ -303,6 +303,9 @@ const generateFromGithubList = (generationRequest) => {
 
             infoJson.projectId = courseId + '-GH-' + githubOwner + '_' + githubRepo;
 
+            // Add empty credentials
+            infoJson.credentials = [];
+
             // Get Identities
             const identities = [
               {
