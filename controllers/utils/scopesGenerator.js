@@ -1,5 +1,6 @@
 const axios = require('axios');
 const jsyaml = require('js-yaml');
+const utils = require('./utils');
 
 const githubRawUrl = 'https://raw.githubusercontent.com/';
 
@@ -14,61 +15,84 @@ const infoFilename = 'info.yml';
 }
 */
 
-const checkFromGithubList = (checkRequest, branch = 'main') => {
+// ------------------------------- Check -------------------------------//
+const checkFromGithubList = (checkRequest) => {
   /*eslint-disable */
   return new Promise(async (resolve, reject) => {
     /* eslint-enable */
     try {
       const missingAndValidation = {};
       const wrongAPIs = {};
+      const infoYmlJson = {};
       const promises = [];
 
       for (const repoURL of checkRequest.repoList) {
-        const githubOwner = repoURL.split('github.com/')[1].split('/')[0];
-        const githubRepo = repoURL.split('github.com/')[1].split('/')[1];
+        let githubOwner, githubRepo;
 
-        await getInfoYaml(githubRawUrl + githubOwner + '/' + githubRepo + '/', branch).then((getInfoYamlResponse) => {
+        try {
+          githubOwner = repoURL.split('github.com/')[1].split('/')[0];
+          githubRepo = repoURL.split('github.com/')[1].split('/')[1];
+        } catch (err) {
+          missingAndValidation[repoURL] = { missingValues: [], wrongFormatValues: ['Wrong URL, it should be a GitHub URL.'] };
+          wrongAPIs[repoURL] = { invalidApiValues: [] };
+          continue;
+        }
+
+        await getInfoYaml(githubRawUrl + githubOwner + '/' + githubRepo + '/', 'main').then((getInfoYamlResponse) => {
           if (getInfoYamlResponse === undefined) {
-            missingAndValidation[repoURL] = { missingValues: ['Github Repo not valid or Info.yml file not found!'], wrongFormatValues: [] };
+            missingAndValidation[repoURL] = { missingValues: ['Github Repo URL not valid or Info.yml file not found!'], wrongFormatValues: [] };
             wrongAPIs[repoURL] = { invalidApiValues: [] };
           } else {
-            const infoJson = jsyaml.load(getInfoYamlResponse.data).project;
+            try {
+              const infoJson = jsyaml.load(getInfoYamlResponse.data).project;
+              infoYmlJson[repoURL] = infoJson;
 
-            // Missing and format
-            const missingAndValidationPromise = new Promise((resolve, reject) => {
-              getMissingAndValidationInfo(infoJson).then((projectValidation) => {
-                missingAndValidation[repoURL] = { ...projectValidation };
-                resolve();
-              }).catch(err => {
-                console.log(err);
-                resolve();
+              // Missing and format
+              const missingAndValidationPromise = new Promise((resolve, reject) => {
+                getMissingAndValidationInfo(infoJson).then((projectValidation) => {
+                  missingAndValidation[repoURL] = { ...projectValidation };
+                  resolve();
+                }).catch(err => {
+                  console.log(err);
+                  resolve();
+                });
               });
-            });
-            promises.push(missingAndValidationPromise);
+              promises.push(missingAndValidationPromise);
 
-            // Invalid API values
-            const invalidAPIValuesPromise = new Promise((resolve, reject) => {
-              getWrongAPIValues(infoJson).then((projectValidation) => {
-                wrongAPIs[repoURL] = { ...projectValidation };
-                resolve();
-              }).catch(err => {
-                console.log(err);
-                resolve();
+              // Invalid API values
+              const invalidAPIValuesPromise = new Promise((resolve, reject) => {
+                getWrongAPIValues(infoJson).then((projectValidation) => {
+                  wrongAPIs[repoURL] = { ...projectValidation };
+                  resolve();
+                }).catch(err => {
+                  console.log(err);
+                  resolve();
+                });
               });
-            });
-            promises.push(invalidAPIValuesPromise);
+              promises.push(invalidAPIValuesPromise);
+            } catch (err) {
+              missingAndValidation[repoURL] = { missingValues: [], wrongFormatValues: ['Not valid info.yml format. Check yaml syntax!'] };
+              wrongAPIs[repoURL] = { invalidApiValues: [] };
+            }
           }
         });
       }
 
       Promise.all(promises).then(() => {
-        const finalResponse = { errorProjects: [] };
+        const finalResponse = [];
         for (const project of Object.keys(missingAndValidation)) {
           const errorProject = {};
           errorProject.projectURL = project;
-          errorProject.errors = { ...missingAndValidation[project] };
-          errorProject.errors.invalidApiValues = wrongAPIs[project].invalidApiValues;
-          finalResponse.errorProjects.push(errorProject);
+
+          // Errors splitted by category
+          // errorProject.errors = { ...missingAndValidation[project] };
+          // errorProject.errors.invalidApiValues = wrongAPIs[project].invalidApiValues;
+
+          // Merged errors
+          errorProject.errors = [...missingAndValidation[project].missingValues, ...missingAndValidation[project].wrongFormatValues];
+          errorProject.errors = [...errorProject.errors, ...wrongAPIs[project].invalidApiValues];
+          errorProject.infoYml = infoYmlJson[project];
+          finalResponse.push(errorProject);
         }
         resolve(finalResponse);
       }).catch(err => {
@@ -173,7 +197,7 @@ const getWrongAPIValues = (infoYml) => {
       const pivotalPromise = new Promise((resolve, reject) => {
         getStatusCode(infoYml.identities.pivotal.url).then(statusCode => {
           if (statusCode !== 200) {
-            wrongAPIs.push('Wrong Url or private project: infoYml.identities.pivotal.url');
+            wrongAPIs.push('Wrong Url or private project: identities.pivotal.url');
           }
           resolve();
         }).catch(err => {
@@ -191,9 +215,9 @@ const getWrongAPIValues = (infoYml) => {
         const url = 'https://api.heroku.com/apps/' + originalURL.split('/')[originalURL.split('/').length - 1];
         getStatusCode(url, { Accept: 'application/vnd.heroku+json; version=3', Authorization: 'Bearer ' + process.env.KEY_HEROKU }).then(statusCode => {
           if (statusCode === 403) {
-            wrongAPIs.push('Forbidden access to Bluejay Auditor: infoYml.identities.heroku.url');
+            wrongAPIs.push('Forbidden access to Bluejay Auditor: identities.heroku.url');
           } else if (statusCode === 404) {
-            wrongAPIs.push('Wrong Url: infoYml.identities.heroku.url');
+            wrongAPIs.push('Wrong Url: identities.heroku.url');
           } else if (statusCode === 401) {
             wrongAPIs.push('Wrong Heroku Credentials - Please, contact Governify administrator');
           }
@@ -212,7 +236,7 @@ const getWrongAPIValues = (infoYml) => {
         const githubUsernamePromise = new Promise((resolve, reject) => {
           getStatusCode('https://github.com/' + infoYml.members[member].githubUsername).then(statusCode => {
             if (statusCode !== 200) {
-              wrongAPIs.push('Wrong Username: infoYml.members.' + member + '.githubUsername');
+              wrongAPIs.push('Wrong Username: members.' + member + '.githubUsername');
             }
             resolve();
           }).catch(err => {
@@ -244,38 +268,43 @@ const getStatusCode = (url, headers = {}) => {
   });
 };
 
-/// ////////////////////////////////////////////////////////////////////////////////////////////
-
-const generateFromGithubList = (generationRequest, substitute = false, branch = 'main') => {
+// ------------------------------- Generation -------------------------------//
+const generateFromGithubList = (generationRequest) => {
   return new Promise((resolve, reject) => {
-    const base = {
-      development: [
-        {
-          classId: 'classId',
-          identities: [],
-          credentials: [],
-          projects: []
-        }
-      ]
-    };
+    const courseId = generationRequest.courseId;
+    let courseScope = utils.getCourse(courseId);
 
-    if (generationRequest.courseId) {
-      base.development[0].classId = generationRequest.courseId;
+    if (!courseScope) {
+      courseScope = {
+        classId: courseId,
+        identities: [],
+        credentials: [],
+        projects: []
+      };
     }
 
     const projects = [];
-    const promises = [];
 
-    for (const repoURL of generationRequest.repoList) {
-      const githubOwner = repoURL.split('github.com/')[1].split('/')[0];
-      const githubRepo = repoURL.split('github.com/')[1].split('/')[1];
+    checkFromGithubList(generationRequest).then((checkedProjects) => {
+      for (const project of checkedProjects) {
+        try {
+          if (project.errors.length !== 0) {
+            projects.push(project);
+          } else {
+            // Prepare project object
+            const newProjectObject = { ...project };
+            delete newProjectObject.errors;
 
-      const promise = new Promise((resolve, reject) => {
-        getInfoYaml(githubRawUrl + githubOwner + '/' + githubRepo + '/', branch).then((response) => {
-          try {
-            const infoJson = jsyaml.load(response.data).project;
+            // Create new scope
+            const infoJson = project.infoYml;
 
-            infoJson.projectId = base.development[0].classId + '-GH-' + githubOwner + '_' + githubRepo;
+            const githubOwner = project.projectURL.split('github.com/')[1].split('/')[0];
+            const githubRepo = project.projectURL.split('github.com/')[1].split('/')[1];
+
+            infoJson.projectId = courseId + '-GH-' + githubOwner + '_' + githubRepo;
+
+            // Add empty credentials
+            infoJson.credentials = [];
 
             // Get Identities
             const identities = [
@@ -291,9 +320,11 @@ const generateFromGithubList = (generationRequest, substitute = false, branch = 
               const identityObject = { source: identity };
 
               if (identity === 'pivotal') {
-                identityObject.projectId = infoJson.identities[identity].projectId.toString();
+                const pivotalUrlSplit = infoJson.identities[identity].url.split('/');
+                identityObject.projectId = pivotalUrlSplit[pivotalUrlSplit.length - 1];
               } else if (identity === 'heroku') {
-                identityObject.projectId = infoJson.identities[identity].appId;
+                const herokuUrlSplit = infoJson.identities[identity].url.split('/');
+                identityObject.projectId = herokuUrlSplit[herokuUrlSplit.length - 1];
               }
               identities.push(identityObject);
             }
@@ -338,25 +369,41 @@ const generateFromGithubList = (generationRequest, substitute = false, branch = 
             delete infoJson.members; // Just for ordering the return object
             infoJson.members = members;
 
-            // Push and resolve
-            projects.push(infoJson);
-            resolve();
-          } catch (err) {
-            console.log(err);
-            resolve();
+            // Obtain old scope
+            const oldScope = utils.getProject(courseId, infoJson.projectId);
+
+            if (JSON.stringify(oldScope) === JSON.stringify(infoJson)) {
+              projects.push({ ...project, errors: ['The is no new changes for this project scope.'], oldScope: { ...oldScope } });
+            } else {
+              oldScope && (newProjectObject.oldScope = { ...oldScope });
+              newProjectObject.newScope = { ...infoJson };
+              projects.push(newProjectObject);
+            }
           }
-        }).catch(err => {
-          console.log('Info.yml retrieval to principal branch failed. Retrying with master instead.', err.message);
-          resolve();
-        });
-      });
+        } catch (err) {
+          console.log(err);
+        }
+      }
 
-      promises.push(promise);
-    }
+      // Substitution
+      for (const project of projects) {
+        if (project.newScope) {
+          if (project.oldScope) {
+            for (const courseIndex in courseScope.projects) {
+              if (courseScope.projects[courseIndex].projectId === project.newScope.projectId) {
+                courseScope.projects[courseIndex] = project.newScope;
+                break;
+              }
+            }
+          } else {
+            courseScope.projects.push(project.newScope);
+          }
+        }
+      }
+      utils.setCourseScope(courseScope, courseId);
 
-    Promise.all(promises).then(() => {
-      base.development[0].projects = projects;
-      resolve(base);
+      // Return response
+      resolve(projects);
     }).catch(err => {
       console.log(err);
       reject(err);

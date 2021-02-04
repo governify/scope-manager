@@ -7,7 +7,7 @@ module.exports.generateScope = function generateScope (req, res, next) {
     utils.sendHelper2(res, 'Request body is empty', 400);
   } else {
     utils.generateScope(req.scope.value).then(response => {
-      utils.sendHelper2(res, response, 200);
+      utils.sendHelper2(res, response, 200, 'projects');
     }).catch(err => {
       console.log(err);
       utils.sendHelper2(res, 'Internal Server Error', 500);

@@ -9,6 +9,7 @@ const scopesGenerator = require('./scopesGenerator');
 let scopeObject;
 let authorizedTokens;
 
+// Scope management
 const init = () => {
   fs.readFile('./configurations/authKeys.json', 'utf-8', (err, data) => {
     if (err) { console.log(err); } else {
@@ -56,6 +57,19 @@ const fetchScopes = () => {
   });
 };
 
+const setCourseScope = (courseScope, courseId) => {
+  let found = false;
+  for (const courseIndex in scopeObject.development) {
+    if (scopeObject.development[courseIndex].classId === courseId) {
+      scopeObject.development[courseIndex] = courseScope;
+      found = true;
+      break;
+    }
+  }
+  !found && scopeObject.development.push(courseScope);
+};
+
+// API methods
 const getCourses = () => {
   try {
     return scopeObject.development;
@@ -315,13 +329,14 @@ const sendHelper = (res, scope) => {
   }
 };
 
-const sendHelper2 = (res, content, code) => {
-  if (code === '200') {
-    res.send({
+const sendHelper2 = (res, content, code, contentName = 'scope') => {
+  if (code === 200) {
+    const sendObject = {
       code: code,
-      message: 'Scope returned',
-      scope: content
-    });
+      message: contentName + ' returned'
+    };
+    sendObject[contentName] = content;
+    res.send(sendObject);
   } else {
     res.send({
       code: code,
@@ -331,6 +346,8 @@ const sendHelper2 = (res, content, code) => {
 };
 
 init();
+
+exports.setCourseScope = setCourseScope;
 
 exports.getCourses = getCourses;
 exports.getCourse = getCourse;
