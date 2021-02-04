@@ -86,7 +86,11 @@ const setCourseScope = (courseScope, courseId) => {
       break;
     }
   }
-  !found && scopeObject.development.push(courseScope);
+
+  // Add if it does not exist
+  //! found && scopeObject.development.push(courseScope);
+
+  !found && console.log('Course does not exist!');
 
   if (process.env.URL_INT_ASSETS_MANAGER && process.env.KEY_ASSETS_MANAGER_PRIVATE) {
     putScopes();

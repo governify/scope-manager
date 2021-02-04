@@ -272,15 +272,17 @@ const getStatusCode = (url, headers = {}) => {
 const generateFromGithubList = (generationRequest) => {
   return new Promise((resolve, reject) => {
     const courseId = generationRequest.courseId;
-    let courseScope = utils.getCourse(courseId);
+    const courseScope = utils.getCourse(courseId);
 
     if (!courseScope) {
-      courseScope = {
+      return reject(new Error('Course does not exist.'));
+      // Creates if does not exist
+      /* courseScope = {
         classId: courseId,
         identities: [],
         credentials: [],
         projects: []
-      };
+      }; */
     }
 
     const projects = [];
