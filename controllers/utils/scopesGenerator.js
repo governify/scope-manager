@@ -196,7 +196,9 @@ const getWrongAPIValues = (infoYml) => {
     if (infoYml.identities.pivotal) {
       const pivotalPromise = new Promise((resolve, reject) => {
         getStatusCode(infoYml.identities.pivotal.url).then(statusCode => {
-          if (statusCode !== 200) {
+          if (statusCode === undefined) {
+            wrongAPIs.push('Wrong Url or private project. If problem persists, please contact Governify administrator: identities.pivotal.url');
+          } else if (statusCode !== 200) {
             wrongAPIs.push('Wrong Url or private project: identities.pivotal.url');
           }
           resolve();
@@ -212,20 +214,29 @@ const getWrongAPIValues = (infoYml) => {
     if (infoYml.identities.heroku && infoYml.identities.heroku.url) {
       const herokuPromise = new Promise((resolve, reject) => {
         const originalURL = infoYml.identities.heroku.url;
-        const url = 'https://api.heroku.com/apps/' + originalURL.split('/')[originalURL.split('/').length - 1];
-        getStatusCode(url, { Accept: 'application/vnd.heroku+json; version=3', Authorization: 'Bearer ' + process.env.KEY_HEROKU }).then(statusCode => {
-          if (statusCode === 403) {
-            wrongAPIs.push('Forbidden access to Bluejay Auditor: identities.heroku.url');
-          } else if (statusCode === 404) {
-            wrongAPIs.push('Wrong Url: identities.heroku.url');
-          } else if (statusCode === 401) {
-            wrongAPIs.push('Wrong Heroku Credentials - Please, contact Governify administrator');
-          }
+        const herokuRegex = /^https:\/\/[a-zA-Z0-9&_-]+\.herokuapp\.com/;
+        if (herokuRegex.test(originalURL)) {
+          const url = 'https://api.heroku.com/apps/' + originalURL.split('://')[1].split('.')[0];
+
+          getStatusCode(url, { Accept: 'application/vnd.heroku+json; version=3', Authorization: 'Bearer ' + process.env.KEY_HEROKU }).then(statusCode => {
+            if (statusCode === 403) {
+              wrongAPIs.push('Forbidden access to Bluejay Auditor: identities.heroku.url');
+            } else if (statusCode === 404) {
+              wrongAPIs.push('Wrong Url: identities.heroku.url. Should follow the following patter: \'https://\' + appId + \'herokuapp.com\'');
+            } else if (statusCode === 401) {
+              wrongAPIs.push('Wrong Heroku Credentials - Please, contact Governify administrator');
+            } else if (statusCode === undefined) {
+              wrongAPIs.push('Wrong URL. If problem persists, please contact Governify administrator: identities.heroku.url');
+            }
+            resolve();
+          }).catch(err => {
+            console.log(err);
+            resolve();
+          });
+        } else {
+          wrongAPIs.push('Wrong Url: identities.heroku.url. Should follow the following patter: \'https://\' + appId + \'herokuapp.com\'');
           resolve();
-        }).catch(err => {
-          console.log(err);
-          resolve();
-        });
+        }
       });
       promises.push(herokuPromise);
     }
@@ -235,7 +246,9 @@ const getWrongAPIValues = (infoYml) => {
       if (infoYml.members[member].githubUsername) {
         const githubUsernamePromise = new Promise((resolve, reject) => {
           getStatusCode('https://github.com/' + infoYml.members[member].githubUsername).then(statusCode => {
-            if (statusCode !== 200) {
+            if (statusCode === undefined) {
+              wrongAPIs.push('Wrong Username. If problem persists, please contact Governify administrator: members.' + member + '.githubUsername');
+            } else if (statusCode !== 200) {
               wrongAPIs.push('Wrong Username: members.' + member + '.githubUsername');
             }
             resolve();
@@ -263,7 +276,7 @@ const getStatusCode = (url, headers = {}) => {
     axios.get(url, { headers: { ...headers } }).then((response) => {
       resolve(response.status);
     }).catch((err) => {
-      resolve(err.response.status);
+      resolve(err.response ? err.response.status : undefined);
     });
   });
 };
