@@ -1,4 +1,19 @@
-# 1.1.0 (2021-02-04)
+# [1.2.0](https://github.com/governify/scope-manager/compare/v1.1.0...v1.2.0) (2021-02-24)
+
+
+### Bug Fixes
+
+* heroku url to herokuapp ([6cfe550](https://github.com/governify/scope-manager/commit/6cfe55093ceb6f675362d545d2b2c972b373653b))
+* if course does not exists fails ([3e0ea5a](https://github.com/governify/scope-manager/commit/3e0ea5aa60ef75ac5d71483a30c11c42ee5b15ee))
+
+
+### Features
+
+* Assets PUT ([2f5d3c2](https://github.com/governify/scope-manager/commit/2f5d3c295e1c9e7da342ff603e839c464b93d8ad))
+
+
+
+# [1.1.0](https://github.com/governify/scope-manager/compare/fcd1ccb1cd3f67045daa7d1df8d5aaa8fe8b9071...v1.1.0) (2021-02-04)
 
 
 ### Bug Fixes
