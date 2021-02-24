@@ -122,7 +122,7 @@ const getMissingAndValidationInfo = (infoObject) => {
               missingAttributes.push('Missing mandatory parameter: ' + key1);
             } else {
               for (const key2 of Object.keys(infoObject[key1])) {
-                for (const key3 of Object.keys(originalInfoObject[key1][key2])) {
+                for (const key3 of Object.keys(originalInfoObject[key1][key1 === 'members' ? 'member' : key2])) {
                   const missingAndValidation = checkField(infoObject[key1][key2][key3], originalInfoObject[key1][key2][key3], 'identities.' + key2 + '.' + key3);
                   if (missingAndValidation === undefined) {
                     missingAttributes.push('Missing mandatory parameter: identities.' + key2 + '.' + key3);
