@@ -57,6 +57,26 @@ const fetchScopes = () => {
   });
 };
 
+const putScopes = () => {
+  return new Promise((resolve, reject) => {
+    console.log('Trying to PUT scopes.json file to assets.');
+    axios.put(process.env.URL_INT_ASSETS_MANAGER + '/api/v1/private/scope-manager/scopes.json', scopeObject, {
+      params: {
+        private_key: process.env.KEY_ASSETS_MANAGER_PRIVATE
+      }
+    }).then((response) => {
+      console.log('Successfully saved scopes to Assets Manager.');
+      console.log(response);
+      resolve();
+    }).catch((err) => {
+      console.log('Error when saving scopes to Assets Manager. Retrying in 10s.', err.message);
+      setTimeout(() => {
+        putScopes();
+      }, 10000);
+    });
+  });
+};
+
 const setCourseScope = (courseScope, courseId) => {
   let found = false;
   for (const courseIndex in scopeObject.development) {
@@ -66,7 +86,19 @@ const setCourseScope = (courseScope, courseId) => {
       break;
     }
   }
-  !found && scopeObject.development.push(courseScope);
+
+  // Add if it does not exist
+  //! found && scopeObject.development.push(courseScope);
+
+  !found && console.log('Course does not exist!');
+
+  if (process.env.URL_INT_ASSETS_MANAGER && process.env.KEY_ASSETS_MANAGER_PRIVATE) {
+    putScopes();
+  } else {
+    console.log('Working without Assets Manager (Missing URL/key). Saving Scopes locally.');
+    fs.writeFileSync('./configurations/scopes.json', JSON.stringify(scopeObject));
+    console.log('Successfully saved scopes to configurations file.');
+  }
 };
 
 // API methods
