@@ -338,8 +338,7 @@ const generateFromGithubList = (generationRequest) => {
                 const pivotalUrlSplit = infoJson.identities[identity].url.split('/');
                 identityObject.projectId = pivotalUrlSplit[pivotalUrlSplit.length - 1];
               } else if (identity === 'heroku') {
-                const herokuUrlSplit = infoJson.identities[identity].url.split('/');
-                identityObject.projectId = herokuUrlSplit[herokuUrlSplit.length - 1];
+                identityObject.projectId = infoJson.identities[identity].url.split('://')[1].split('.')[0];
               }
               identities.push(identityObject);
             }
