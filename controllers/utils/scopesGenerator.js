@@ -429,6 +429,7 @@ const generateFromGithubList = (generationRequest) => {
 
 const getInfoYaml = (url, branch) => {
   return new Promise((resolve, reject) => {
+    console.log(url + branch + '/' + infoFilename, process.env.KEY_GITHUB ? 'token ' + process.env.KEY_GITHUB : '');
     axios.get(url + branch + '/' + infoFilename, { headers: { Authentication: process.env.KEY_GITHUB ? 'token ' + process.env.KEY_GITHUB : '' } }).then((response) => {
       resolve(response);
     }).catch(() => {
