@@ -133,6 +133,8 @@ const getMissingAndValidationInfo = (infoObject) => {
               }
             }
             break;
+          case 'slackWebhook':
+            break;
           default:
             if (infoObject[key1] === undefined) {
               missingAttributes.push('Missing mandatory parameter: ' + key1);
@@ -427,7 +429,7 @@ const generateFromGithubList = (generationRequest) => {
 
 const getInfoYaml = (url, branch) => {
   return new Promise((resolve, reject) => {
-    axios.get(url + branch + '/' + infoFilename).then((response) => {
+    axios.get(url + branch + '/' + infoFilename, { Authentication: process.env.KEY_GITHUB ? 'token ' + process.env.KEY_GITHUB : '' }).then((response) => {
       resolve(response);
     }).catch(() => {
       if (branch !== 'master') {
