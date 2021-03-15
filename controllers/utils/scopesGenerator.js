@@ -334,15 +334,17 @@ const generateFromGithubList = (generationRequest) => {
             ];
 
             for (const identity of Object.keys(infoJson.identities)) {
-              const identityObject = { source: identity };
+              if (identity.source !== 'github') {
+                const identityObject = { source: identity };
 
-              if (identity === 'pivotal') {
-                const pivotalUrlSplit = infoJson.identities[identity].url.split('/');
-                identityObject.projectId = pivotalUrlSplit[pivotalUrlSplit.length - 1];
-              } else if (identity === 'heroku') {
-                identityObject.projectId = infoJson.identities[identity].url.split('://')[1].split('.')[0];
+                if (identity === 'pivotal') {
+                  const pivotalUrlSplit = infoJson.identities[identity].url.split('/');
+                  identityObject.projectId = pivotalUrlSplit[pivotalUrlSplit.length - 1];
+                } else if (identity === 'heroku') {
+                  identityObject.projectId = infoJson.identities[identity].url.split('://')[1].split('.')[0];
+                }
+                identities.push(identityObject);
               }
-              identities.push(identityObject);
             }
             delete infoJson.identities; // Just for ordering the return object
             infoJson.identities = identities;
