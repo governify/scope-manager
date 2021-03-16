@@ -334,7 +334,7 @@ const generateFromGithubList = (generationRequest) => {
             ];
 
             for (const identity of Object.keys(infoJson.identities)) {
-              if (identity.source !== 'github') {
+              if (identity !== 'github') {
                 const identityObject = { source: identity };
 
                 if (identity === 'pivotal') {
