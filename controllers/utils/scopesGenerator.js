@@ -320,6 +320,22 @@ const generateFromGithubList = (generationRequest) => {
 
             infoJson.projectId = courseId + '-GH-' + githubOwner + '_' + githubRepo;
 
+            // Add notifications
+            const notifications = {};
+            if (infoJson.slackWebhook) {
+              notifications.grafana = {
+                slack: {
+                  name: 'Slack-Notification',
+                  type: 'slack',
+                  settings: {
+                    url: infoJson.slackWebhook
+                  }
+                }
+              };
+            }
+            delete infoJson.slackWebhook;
+            infoJson.notifications = notifications;
+
             // Add empty credentials
             infoJson.credentials = [];
 
@@ -418,7 +434,7 @@ const generateFromGithubList = (generationRequest) => {
           }
         }
       }
-      utils.setCourseScope(courseScope, courseId);
+      // utils.setCourseScope(courseScope, courseId);
 
       // Return response
       resolve(projects);
