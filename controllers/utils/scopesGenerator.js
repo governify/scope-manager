@@ -434,7 +434,7 @@ const generateFromGithubList = (generationRequest) => {
           }
         }
       }
-      // utils.setCourseScope(courseScope, courseId);
+      utils.setCourseScope(courseScope, courseId);
 
       // Return response
       resolve(projects);
