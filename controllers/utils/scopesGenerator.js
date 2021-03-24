@@ -322,18 +322,19 @@ const generateFromGithubList = (generationRequest) => {
 
             // Add notifications
             const notifications = {};
-            if (infoJson.slackWebhook) {
+            if (infoJson.notifications) {
               notifications.grafana = {
                 slack: {
                   name: 'Slack-Notification',
                   type: 'slack',
                   settings: {
-                    url: infoJson.slackWebhook
+                    url: infoJson.notifications.slack.url
                   }
                 }
               };
+              delete infoJson.notifications;
             }
-            delete infoJson.slackWebhook;
+
             infoJson.notifications = notifications;
 
             // Add empty credentials
