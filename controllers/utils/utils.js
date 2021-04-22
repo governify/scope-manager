@@ -19,10 +19,10 @@ const init = () => {
     }
   });
 
-  if (process.env.URL_INT_ASSETS_MANAGER && process.env.KEY_ASSETS_MANAGER_PRIVATE) {
+  if (process.env.KEY_ASSETS_MANAGER_PRIVATE) {
     fetchScopes();
   } else {
-    console.log('Working without Assets Manager (Missing URL/key).');
+    console.log('Working without Assets Manager (Missing key).');
     fs.readFile('./configurations/scopes.json', (err, data) => {
       if (err) { console.log(err); } else {
         console.log('Successfully loaded scopes from configurations file.');
@@ -93,7 +93,7 @@ const setCourseScope = (courseScope, courseId) => {
 
   !found && console.log('Course does not exist!');
 
-  if (process.env.URL_INT_ASSETS_MANAGER && process.env.KEY_ASSETS_MANAGER_PRIVATE) {
+  if (process.env.KEY_ASSETS_MANAGER_PRIVATE) {
     putScopes();
   } else {
     console.log('Working without Assets Manager (Missing URL/key). Saving Scopes locally.');
