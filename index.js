@@ -6,8 +6,8 @@ const server = require('./server');
 
 const env = process.env.NODE_ENV ? process.env.NODE_ENV : 'production';
 
-governify.init().then(() => {
-  server.deploy(env).catch(err => { console.log(err); });
+governify.init().then((commonsMiddleware) => {
+  server.deploy(env, commonsMiddleware).catch(err => { console.log(err); });
 });
 
 // quit on ctrl-c when running docker in terminal
