@@ -1,5 +1,6 @@
-const axios = require('axios');
 const jsyaml = require('js-yaml');
+const governify = require('governify-commons');
+
 const utils = require('./utils');
 
 const githubRawUrl = 'https://raw.githubusercontent.com/';
@@ -111,7 +112,7 @@ const getMissingAndValidationInfo = (infoObject) => {
     const missingAttributes = [];
     const wrongAttributes = [];
 
-    axios.get('https://raw.githubusercontent.com/governify/audited-project-template/main/info.yml').then((response) => {
+    governify.httpClient.get('https://raw.githubusercontent.com/governify/audited-project-template/main/info.yml').then((response) => {
       const originalInfoObject = jsyaml.load(response.data).project;
 
       for (const key1 of Object.keys(originalInfoObject)) {
@@ -275,7 +276,7 @@ const getWrongAPIValues = (infoYml) => {
 
 const getStatusCode = (url, headers = {}) => {
   return new Promise((resolve, reject) => {
-    axios.get(url, { headers: { ...headers } }).then((response) => {
+    governify.httpClient.get(url, { headers: { ...headers } }).then((response) => {
       resolve(response.status);
     }).catch((err) => {
       resolve(err.response ? err.response.status : undefined);
@@ -448,7 +449,7 @@ const generateFromGithubList = (generationRequest) => {
 
 const getInfoYaml = (url, branch) => {
   return new Promise((resolve, reject) => {
-    axios.get(url + branch + '/' + infoFilename, { headers: { Authorization: process.env.KEY_GITHUB ? 'token ' + process.env.KEY_GITHUB : '' } }).then((response) => {
+    governify.httpClient.get(url + branch + '/' + infoFilename, { headers: { Authorization: process.env.KEY_GITHUB ? 'token ' + process.env.KEY_GITHUB : '' } }).then((response) => {
       resolve(response);
     }).catch(() => {
       if (branch !== 'master') {
