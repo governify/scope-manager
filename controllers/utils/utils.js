@@ -1,9 +1,10 @@
 'use strict';
 
 const fs = require('fs');
-const axios = require('axios');
 const mustache = require('mustache');
 mustache.escape = function (text) { return text; };
+const governify = require('governify-commons');
+
 const scopesGenerator = require('./scopesGenerator');
 
 let scopeObject;
@@ -18,10 +19,10 @@ const init = () => {
     }
   });
 
-  if (process.env.URL_INT_ASSETS_MANAGER && process.env.KEY_ASSETS_MANAGER_PRIVATE) {
+  if (process.env.KEY_ASSETS_MANAGER_PRIVATE) {
     fetchScopes();
   } else {
-    console.log('Working without Assets Manager (Missing URL/key).');
+    console.log('Working without Assets Manager (Missing key).');
     fs.readFile('./configurations/scopes.json', (err, data) => {
       if (err) { console.log(err); } else {
         console.log('Successfully loaded scopes from configurations file.');
@@ -34,7 +35,7 @@ const init = () => {
 const fetchScopes = () => {
   return new Promise((resolve, reject) => {
     console.log('Trying to fetch scopes.json file from assets.');
-    axios.get(process.env.URL_INT_ASSETS_MANAGER + '/api/v1/private/scope-manager/scopes.json', {
+    governify.infrastructure.getService('internal.assets').get('/api/v1/private/scope-manager/scopes.json', {
       params: {
         private_key: process.env.KEY_ASSETS_MANAGER_PRIVATE
       }
@@ -60,7 +61,7 @@ const fetchScopes = () => {
 const putScopes = () => {
   return new Promise((resolve, reject) => {
     console.log('Trying to PUT scopes.json file to assets.');
-    axios.put(process.env.URL_INT_ASSETS_MANAGER + '/api/v1/private/scope-manager/scopes.json', scopeObject, {
+    governify.infrastructure.getService('internal.assets').put('/api/v1/private/scope-manager/scopes.json', scopeObject, {
       params: {
         private_key: process.env.KEY_ASSETS_MANAGER_PRIVATE
       }
@@ -92,7 +93,7 @@ const setCourseScope = (courseScope, courseId) => {
 
   !found && console.log('Course does not exist!');
 
-  if (process.env.URL_INT_ASSETS_MANAGER && process.env.KEY_ASSETS_MANAGER_PRIVATE) {
+  if (process.env.KEY_ASSETS_MANAGER_PRIVATE) {
     putScopes();
   } else {
     console.log('Working without Assets Manager (Missing URL/key). Saving Scopes locally.');

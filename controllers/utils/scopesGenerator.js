@@ -1,5 +1,6 @@
-const axios = require('axios');
 const jsyaml = require('js-yaml');
+const governify = require('governify-commons');
+
 const utils = require('./utils');
 
 const githubRawUrl = 'https://raw.githubusercontent.com/';
@@ -111,7 +112,7 @@ const getMissingAndValidationInfo = (infoObject) => {
     const missingAttributes = [];
     const wrongAttributes = [];
 
-    axios.get('https://raw.githubusercontent.com/governify/audited-project-template/main/info.yml').then((response) => {
+    governify.httpClient.get('https://raw.githubusercontent.com/governify/audited-project-template/main/info.yml').then((response) => {
       const originalInfoObject = jsyaml.load(response.data).project;
 
       for (const key1 of Object.keys(originalInfoObject)) {
@@ -122,8 +123,8 @@ const getMissingAndValidationInfo = (infoObject) => {
               missingAttributes.push('Missing mandatory parameter: ' + key1);
             } else {
               for (const key2 of Object.keys(infoObject[key1])) {
-                for (const key3 of Object.keys(originalInfoObject[key1][key2])) {
-                  const missingAndValidation = checkField(infoObject[key1][key2][key3], originalInfoObject[key1][key2][key3], 'identities.' + key2 + '.' + key3);
+                for (const key3 of Object.keys(originalInfoObject[key1][key1 === 'members' ? 'member' : key2])) {
+                  const missingAndValidation = checkField(infoObject[key1][key2][key3], originalInfoObject[key1][key1 === 'members' ? 'member' : key2][key3], 'identities.' + key2 + '.' + key3);
                   if (missingAndValidation === undefined) {
                     missingAttributes.push('Missing mandatory parameter: identities.' + key2 + '.' + key3);
                   } else if (missingAndValidation !== null) {
@@ -132,6 +133,8 @@ const getMissingAndValidationInfo = (infoObject) => {
                 }
               }
             }
+            break;
+          case 'slackWebhook':
             break;
           default:
             if (infoObject[key1] === undefined) {
@@ -273,7 +276,7 @@ const getWrongAPIValues = (infoYml) => {
 
 const getStatusCode = (url, headers = {}) => {
   return new Promise((resolve, reject) => {
-    axios.get(url, { headers: { ...headers } }).then((response) => {
+    governify.httpClient.get(url, { headers: { ...headers } }).then((response) => {
       resolve(response.status);
     }).catch((err) => {
       resolve(err.response ? err.response.status : undefined);
@@ -318,6 +321,23 @@ const generateFromGithubList = (generationRequest) => {
 
             infoJson.projectId = courseId + '-GH-' + githubOwner + '_' + githubRepo;
 
+            // Add notifications
+            const notifications = {};
+            if (infoJson.notifications) {
+              notifications.grafana = {
+                slack: {
+                  name: 'Slack-Notification',
+                  type: 'slack',
+                  settings: {
+                    url: infoJson.notifications.slack.url
+                  }
+                }
+              };
+              delete infoJson.notifications;
+            }
+
+            infoJson.notifications = notifications;
+
             // Add empty credentials
             infoJson.credentials = [];
 
@@ -332,16 +352,17 @@ const generateFromGithubList = (generationRequest) => {
             ];
 
             for (const identity of Object.keys(infoJson.identities)) {
-              const identityObject = { source: identity };
+              if (identity !== 'github') {
+                const identityObject = { source: identity };
 
-              if (identity === 'pivotal') {
-                const pivotalUrlSplit = infoJson.identities[identity].url.split('/');
-                identityObject.projectId = pivotalUrlSplit[pivotalUrlSplit.length - 1];
-              } else if (identity === 'heroku') {
-                const herokuUrlSplit = infoJson.identities[identity].url.split('/');
-                identityObject.projectId = herokuUrlSplit[herokuUrlSplit.length - 1];
+                if (identity === 'pivotal') {
+                  const pivotalUrlSplit = infoJson.identities[identity].url.split('/');
+                  identityObject.projectId = pivotalUrlSplit[pivotalUrlSplit.length - 1];
+                } else if (identity === 'heroku') {
+                  identityObject.projectId = infoJson.identities[identity].url.split('://')[1].split('.')[0];
+                }
+                identities.push(identityObject);
               }
-              identities.push(identityObject);
             }
             delete infoJson.identities; // Just for ordering the return object
             infoJson.identities = identities;
@@ -428,7 +449,7 @@ const generateFromGithubList = (generationRequest) => {
 
 const getInfoYaml = (url, branch) => {
   return new Promise((resolve, reject) => {
-    axios.get(url + branch + '/' + infoFilename).then((response) => {
+    governify.httpClient.get(url + branch + '/' + infoFilename, { headers: { Authorization: process.env.KEY_GITHUB ? 'token ' + process.env.KEY_GITHUB : '' } }).then((response) => {
       resolve(response);
     }).catch(() => {
       if (branch !== 'master') {

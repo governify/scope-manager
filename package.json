@@ -17,10 +17,10 @@
   "license": "GPL-3.0+",
   "private": true,
   "dependencies": {
-    "dotenv": "^8.2.0",
-    "axios": "^0.21.1",
     "body-parser": "^1.18.3",
+    "dotenv": "^8.2.0",
     "express": "^4.16.3",
+    "governify-commons": "1.x",
     "js-yaml": "^3.3.0",
     "mustache": "^4.0.1",
     "oas-tools": "^2.1.4"
