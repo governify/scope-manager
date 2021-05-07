@@ -1,3 +1,35 @@
+# [1.3.0](https://github.com/governify/scope-manager/compare/v1.2.0...v1.3.0) (2021-05-07)
+
+
+### Bug Fixes
+
+* axios headers ([edfd2a9](https://github.com/governify/scope-manager/commit/edfd2a95dee6be390d256bac36ff465a9cf78738))
+* check members ([ed88c49](https://github.com/governify/scope-manager/commit/ed88c49b792d46afc6760cbbeba647ada61bc7fb))
+* debug token ([c769819](https://github.com/governify/scope-manager/commit/c769819761c92d58ef23d0f1653a51b9967baeb0))
+* default scope manager key ([882af77](https://github.com/governify/scope-manager/commit/882af779b438e92445a1007836e783700c35360a))
+* e2e pipeline ([3b6c2aa](https://github.com/governify/scope-manager/commit/3b6c2aa42ee169c32bbfe5ea1f45a3aa61d6ffb0))
+* github identity ([5aaf12d](https://github.com/governify/scope-manager/commit/5aaf12d40532806092a1df153e7706d080ad017b))
+* github identity ([c73af00](https://github.com/governify/scope-manager/commit/c73af00809375f0d76c59634f8787a629396f025))
+* header ([03e2df8](https://github.com/governify/scope-manager/commit/03e2df8ec04e1a45f04df8609154a20edca1bc1d))
+* herokuUrl generation ([8945e74](https://github.com/governify/scope-manager/commit/8945e7438d4aaa4a9a3804aeed6eba9507a80b87))
+* infrastructure databases ([159bb57](https://github.com/governify/scope-manager/commit/159bb57a372bd91c4f44f5fc2e4cadc9a713242b))
+* original info object generalization ([c65c64f](https://github.com/governify/scope-manager/commit/c65c64f3576e4410d9499e5cb9c5626653371f4f))
+* persist scopes ([519ffa1](https://github.com/governify/scope-manager/commit/519ffa1866767c8a4dc1dd992d01dbc9a53a6e3b))
+* removed URL_INT_ASSETS ([aa549f1](https://github.com/governify/scope-manager/commit/aa549f1504328bfde1f9bbfaf2ad8513a53b249f))
+
+
+### Features
+
+* commons middleware ([2d82189](https://github.com/governify/scope-manager/commit/2d821898d2ccb60b5d5749cb25767239b76e1b5b))
+* governify-commons requests and port changed ([66a0bf6](https://github.com/governify/scope-manager/commit/66a0bf60f825468fc0a44bb101b4a0a73534d6a7))
+* info.yml token ([597801b](https://github.com/governify/scope-manager/commit/597801b69f829f9b4b1191b24ae06449ca16a836))
+* notifications in scope ([d75c7ff](https://github.com/governify/scope-manager/commit/d75c7ff3587c692da24a1f919fae76e5425e78e8))
+* slackWebhook -> notifications.slack.url ([e366f85](https://github.com/governify/scope-manager/commit/e366f854b78d83e8f68cc8b6abf0fc4fc4b20c47))
+* updated commons ([6b6bf94](https://github.com/governify/scope-manager/commit/6b6bf94b3483b7dffdaa9d4ef92d87ef4286fb5e))
+* updated governify-commons ([be92dc8](https://github.com/governify/scope-manager/commit/be92dc8fdad8d2bb09d6b9769c91e25536f6ba60))
+
+
+
 # [1.2.0](https://github.com/governify/scope-manager/compare/v1.1.0...v1.2.0) (2021-02-24)
 
 
