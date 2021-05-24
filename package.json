@@ -18,6 +18,7 @@
   "private": true,
   "dependencies": {
     "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.16.3",
     "governify-commons": "1.x",

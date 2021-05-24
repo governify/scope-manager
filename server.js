@@ -16,6 +16,9 @@ const deploy = (env, commonsMiddleware) => {
       }));
       app.use('/commons', commonsMiddleware);
 
+      const cors = require('cors');
+      app.use(cors());
+
       const oasTools = require('oas-tools');
       const jsyaml = require('js-yaml');
       const serverPort = process.env.PORT || 5700;
