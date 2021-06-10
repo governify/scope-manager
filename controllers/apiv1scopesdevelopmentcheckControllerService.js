@@ -1,6 +1,7 @@
 'use strict';
 
 const utils = require('./utils/utils');
+const logger = require('governify-commons').getLogger().tag('check-info');
 
 module.exports.checkInfo = function checkInfo (req, res, next) {
   if (!res.req.body || JSON.stringify(res.req.body) === '{}') {
@@ -9,7 +10,7 @@ module.exports.checkInfo = function checkInfo (req, res, next) {
     utils.checkInfoYml(req.scope.value).then(response => {
       utils.sendHelper2(res, response, 200, 'projects');
     }).catch(err => {
-      console.log(err);
+      logger.error(err);
       utils.sendHelper2(res, 'Internal Server Error', 500);
     });
   }

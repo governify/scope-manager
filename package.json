@@ -21,7 +21,7 @@
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.16.3",
-    "governify-commons": "1.x",
+    "governify-commons": "^1.9.7",
     "js-yaml": "^3.3.0",
     "mustache": "^4.0.1",
     "oas-tools": "^2.1.4"

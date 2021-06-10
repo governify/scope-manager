@@ -1,5 +1,6 @@
 const jsyaml = require('js-yaml');
 const governify = require('governify-commons');
+const logger = governify.getLogger().tag('scopes-generator');
 
 const utils = require('./utils');
 
@@ -54,7 +55,7 @@ const checkFromGithubList = (checkRequest) => {
                   missingAndValidation[repoURL] = { ...projectValidation };
                   resolve();
                 }).catch(err => {
-                  console.log(err);
+                  logger.error(err);
                   resolve();
                 });
               });
@@ -66,7 +67,7 @@ const checkFromGithubList = (checkRequest) => {
                   wrongAPIs[repoURL] = { ...projectValidation };
                   resolve();
                 }).catch(err => {
-                  console.log(err);
+                  logger.error(err);
                   resolve();
                 });
               });
@@ -97,7 +98,7 @@ const checkFromGithubList = (checkRequest) => {
         }
         resolve(finalResponse);
       }).catch(err => {
-        console.log(err);
+        logger.error(err);
         reject(err);
       });
     } catch (err) {
@@ -206,7 +207,7 @@ const getWrongAPIValues = (infoYml) => {
           }
           resolve();
         }).catch(err => {
-          console.log(err);
+          logger.error(err);
           resolve();
         });
       });
@@ -233,7 +234,7 @@ const getWrongAPIValues = (infoYml) => {
             }
             resolve();
           }).catch(err => {
-            console.log(err);
+            logger.error(err);
             resolve();
           });
         } else {
@@ -256,7 +257,7 @@ const getWrongAPIValues = (infoYml) => {
             }
             resolve();
           }).catch(err => {
-            console.log(err);
+            logger.error(err);
             resolve();
           });
         });
@@ -268,7 +269,7 @@ const getWrongAPIValues = (infoYml) => {
     Promise.all(promises).then(() => {
       resolve({ invalidApiValues: wrongAPIs });
     }).catch(err => {
-      console.log(err);
+      logger.error(err);
       reject(err);
     });
   });
@@ -417,7 +418,7 @@ const generateFromGithubList = (generationRequest) => {
             }
           }
         } catch (err) {
-          console.log(err);
+          logger.error(err);
         }
       }
 
@@ -441,7 +442,7 @@ const generateFromGithubList = (generationRequest) => {
       // Return response
       resolve(projects);
     }).catch(err => {
-      console.log(err);
+      logger.error(err);
       reject(err);
     });
   });
@@ -455,7 +456,7 @@ const getInfoYaml = (url, branch) => {
       if (branch !== 'master') {
         resolve(getInfoYaml(url, 'master'));
       } else {
-        console.log('Not found info.yml: ' + url + branch + '/' + infoFilename);
+        logger.info('Not found info.yml: ' + url + branch + '/' + infoFilename);
         resolve(undefined);
       }
     });
