@@ -1,3 +1,18 @@
+# [1.4.0](https://github.com/governify/scope-manager/compare/v1.3.0...v1.4.0) (2021-05-24)
+
+
+### Bug Fixes
+
+* cors ([5ae1cd7](https://github.com/governify/scope-manager/commit/5ae1cd7404a82c845b87634109e8721fa100d6d7))
+
+
+### Features
+
+* cors ([8f795e0](https://github.com/governify/scope-manager/commit/8f795e0f25247b218bc9e291409df97abd6ec913))
+* E2E assets to develop ([8ccff98](https://github.com/governify/scope-manager/commit/8ccff98cfb8a43357f2bcb23c50c3a6613eb3d1d))
+
+
+
 # [1.3.0](https://github.com/governify/scope-manager/compare/v1.2.0...v1.3.0) (2021-05-07)
 
 
