@@ -14,7 +14,7 @@ const deploy = (env, commonsMiddleware) => {
       app.use(bodyParser.json({
         strict: false
       }));
-      app.use('/commons', commonsMiddleware);
+      app.use(commonsMiddleware);
 
       const cors = require('cors');
       app.use(cors());
