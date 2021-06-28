@@ -1,0 +1,607 @@
+[
+    {
+        "name": "",
+        "method": "GET",
+        "endpoint": "/development/courses",
+        "body": {},
+        "response": {
+            "code": 200,
+            "message": "Scope returned",
+            "scope": [
+                {
+                    "classId": "class01",
+                    "identities": [],
+                    "credentials": [],
+                    "projects": [
+                        {
+                            "projectId": "project01",
+                            "identities": [
+                                {
+                                    "source": "github"
+                                },
+                                {
+                                    "source": "pivotal"
+                                },
+                                {
+                                    "source": "heroku"
+                                },
+                                {
+                                    "source": "travis"
+                                },
+                                {
+                                    "source": "codeclimate"
+                                }
+                            ],
+                            "credentials": [],
+                            "members": []
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "name": "",
+        "method": "GET",
+        "endpoint": "/development/class01",
+        "body": {},
+        "response": {
+            "code": 200,
+            "message": "Scope returned",
+            "scope": {
+                "classId": "class01",
+                "identities": [],
+                "credentials": [],
+                "projects": [
+                    {
+                        "projectId": "project01",
+                        "identities": [
+                            {
+                                "source": "github"
+                            },
+                            {
+                                "source": "pivotal"
+                            },
+                            {
+                                "source": "heroku"
+                            },
+                            {
+                                "source": "travis"
+                            },
+                            {
+                                "source": "codeclimate"
+                            }
+                        ],
+                        "credentials": [],
+                        "members": []
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "name": "",
+        "method": "GET",
+        "endpoint": "/development/class01/projects",
+        "body": {},
+        "response": {
+            "code": 200,
+            "message": "Scope returned",
+            "scope": [
+                {
+                    "projectId": "project01",
+                    "identities": [
+                        {
+                            "source": "github"
+                        },
+                        {
+                            "source": "pivotal"
+                        },
+                        {
+                            "source": "heroku"
+                        },
+                        {
+                            "source": "travis"
+                        },
+                        {
+                            "source": "codeclimate"
+                        }
+                    ],
+                    "credentials": [],
+                    "members": []
+                }
+            ]
+        }
+    },
+    {
+        "name": "",
+        "method": "GET",
+        "endpoint": "/development/class01/project01",
+        "body": {},
+        "response": {
+            "code": 200,
+            "message": "Scope returned",
+            "scope": {
+                "projectId": "project01",
+                "identities": [
+                    {
+                        "source": "github"
+                    },
+                    {
+                        "source": "pivotal"
+                    },
+                    {
+                        "source": "heroku"
+                    },
+                    {
+                        "source": "travis"
+                    },
+                    {
+                        "source": "codeclimate"
+                    }
+                ],
+                "credentials": [],
+                "members": []
+            }
+        }
+    },
+    {
+        "name": "",
+        "method": "GET",
+        "endpoint": "/development/class01/project01/members",
+        "body": {},
+        "response": {
+            "code": 200,
+            "message": "Scope returned",
+            "scope": []
+        }
+    },
+    {
+        "name": "",
+        "method": "POST",
+        "endpoint": "/development/generate",
+        "body": {
+            "courseId": "class01",
+            "repoList": [
+                "https://github.com/governifyauditor/goldenflow-showcase-project"
+            ]
+        },
+        "response": {
+            "code": 200,
+            "message": "projects returned",
+            "projects": [
+                {
+                    "projectURL": "https://github.com/governifyauditor/goldenflow-showcase-project",
+                    "errors": [
+                        "Wrong Heroku Credentials - Please, contact Governify administrator"
+                    ],
+                    "infoYml": {
+                        "name": "Golden Flow Showcase Project",
+                        "owner": "governify",
+                        "teamId": "123",
+                        "notifications": {
+                            "slack": {
+                                "url": "https://hooks.slack.com/services/AAAAAA/BBBBBBB/CCCCCC"
+                            }
+                        },
+                        "identities": {
+                            "pivotal": {
+                                "url": "https://www.pivotaltracker.com/n/projects/2487566"
+                            },
+                            "heroku": {
+                                "url": "https://goldenflow-showcase-project.herokuapp.com/"
+                            },
+                            "travis": {
+                                "url": "https://travis-ci.org/github/governifyauditor/goldenflow-showcase-project"
+                            },
+                            "codeclimate": {
+                                "url": "https://codeclimate.com/github/governifyauditor/goldenflow-showcase-project"
+                            }
+                        },
+                        "members": {
+                            "member1": {
+                                "name": "Governify",
+                                "surname": "Auditor",
+                                "githubUsername": "governifyauditor",
+                                "pivotalUsername": "governifyauditor",
+                                "herokuEmail": "governify.auditor@gmail.com"
+                            },
+                            "member2": {
+                                "name": "Cesar",
+                                "surname": "GP",
+                                "githubUsername": "cesgarpas",
+                                "pivotalUsername": "cesgarpas",
+                                "herokuEmail": "cesgarpas@cesgarpas.com"
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "name": "",
+        "method": "POST",
+        "endpoint": "/development/check",
+        "body": {
+            "repoList": [
+                "https://github.com/governifyauditor/goldenflow-showcase-project"
+            ]
+        },
+        "response": {
+            "code": 200,
+            "message": "projects returned",
+            "projects": [
+                {
+                    "projectURL": "https://github.com/governifyauditor/goldenflow-showcase-project",
+                    "errors": [
+                        "Wrong Heroku Credentials - Please, contact Governify administrator"
+                    ],
+                    "infoYml": {
+                        "name": "Golden Flow Showcase Project",
+                        "owner": "governify",
+                        "teamId": "123",
+                        "notifications": {
+                            "slack": {
+                                "url": "https://hooks.slack.com/services/AAAAAA/BBBBBBB/CCCCCC"
+                            }
+                        },
+                        "identities": {
+                            "pivotal": {
+                                "url": "https://www.pivotaltracker.com/n/projects/2487566"
+                            },
+                            "heroku": {
+                                "url": "https://goldenflow-showcase-project.herokuapp.com/"
+                            },
+                            "travis": {
+                                "url": "https://travis-ci.org/github/governifyauditor/goldenflow-showcase-project"
+                            },
+                            "codeclimate": {
+                                "url": "https://codeclimate.com/github/governifyauditor/goldenflow-showcase-project"
+                            }
+                        },
+                        "members": {
+                            "member1": {
+                                "name": "Governify",
+                                "surname": "Auditor",
+                                "githubUsername": "governifyauditor",
+                                "pivotalUsername": "governifyauditor",
+                                "herokuEmail": "governify.auditor@gmail.com"
+                            },
+                            "member2": {
+                                "name": "Cesar",
+                                "surname": "GP",
+                                "githubUsername": "cesgarpas",
+                                "pivotalUsername": "cesgarpas",
+                                "herokuEmail": "cesgarpas@cesgarpas.com"
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "name": "Search all: ",
+        "method": "POST",
+        "endpoint": "/development/search",
+        "auth": "c025ff8502893fc6c5a87cf3febe4882",
+        "body": {},
+        "response": {
+            "code": 200,
+            "message": "Scope returned",
+            "scope": [
+                {
+                    "classId": "class01",
+                    "identities": [],
+                    "credentials": [],
+                    "projects": [
+                        {
+                            "projectId": "project01",
+                            "identities": [
+                                {
+                                    "source": "github",
+                                    "repository": "repo01",
+                                    "repoOwner": "owner01"
+                                },
+                                {
+                                    "source": "pivotal",
+                                    "projectId": 1
+                                },
+                                {
+                                    "source": "heroku",
+                                    "projectId": "id1"
+                                },
+                                {
+                                    "source": "travis"
+                                },
+                                {
+                                    "source": "codeclimate"
+                                }
+                            ],
+                            "credentials": [
+                                {
+                                    "source": "github",
+                                    "apiKey": "githubToken"
+                                },
+                                {
+                                    "source": "pivotal",
+                                    "apiKey": "pivotalToken"
+                                },
+                                {
+                                    "source": "heroku",
+                                    "apiKey": "herokuToken"
+                                },
+                                {
+                                    "source": "travis",
+                                    "apiKey": "travisToken"
+                                },
+                                {
+                                    "source": "codeclimate",
+                                    "apiKey": "codeclimateToken"
+                                }
+                            ],
+                            "members": [
+                                {
+                                    "memberId": 1,
+                                    "identities": [
+                                        {
+                                            "source": "github",
+                                            "username": "githubName1"
+                                        },
+                                        {
+                                            "source": "pivotal",
+                                            "username": "pivotalName1"
+                                        }
+                                    ],
+                                    "credentials": []
+                                },
+                                {
+                                    "memberId": 2,
+                                    "identities": [
+                                        {
+                                            "source": "github",
+                                            "username": "githubName2"
+                                        },
+                                        {
+                                            "source": "pivotal",
+                                            "username": "pivotalName2"
+                                        }
+                                    ],
+                                    "credentials": []
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "name": "Search course: ",
+        "method": "POST",
+        "endpoint": "/development/search",
+        "auth": "c025ff8502893fc6c5a87cf3febe4882",
+        "body": {
+            "class": {
+                "default": "class01"
+            }
+        },
+        "response": {
+            "code": 200,
+            "message": "Scope returned",
+            "scope": {
+                "classId": "class01",
+                "identities": [],
+                "credentials": [],
+                "projects": [
+                    {
+                        "projectId": "project01",
+                        "identities": [
+                            {
+                                "source": "github",
+                                "repository": "repo01",
+                                "repoOwner": "owner01"
+                            },
+                            {
+                                "source": "pivotal",
+                                "projectId": 1
+                            },
+                            {
+                                "source": "heroku",
+                                "projectId": "id1"
+                            },
+                            {
+                                "source": "travis"
+                            },
+                            {
+                                "source": "codeclimate"
+                            }
+                        ],
+                        "credentials": [
+                            {
+                                "source": "github",
+                                "apiKey": "githubToken"
+                            },
+                            {
+                                "source": "pivotal",
+                                "apiKey": "pivotalToken"
+                            },
+                            {
+                                "source": "heroku",
+                                "apiKey": "herokuToken"
+                            },
+                            {
+                                "source": "travis",
+                                "apiKey": "travisToken"
+                            },
+                            {
+                                "source": "codeclimate",
+                                "apiKey": "codeclimateToken"
+                            }
+                        ],
+                        "members": [
+                            {
+                                "memberId": 1,
+                                "identities": [
+                                    {
+                                        "source": "github",
+                                        "username": "githubName1"
+                                    },
+                                    {
+                                        "source": "pivotal",
+                                        "username": "pivotalName1"
+                                    }
+                                ],
+                                "credentials": []
+                            },
+                            {
+                                "memberId": 2,
+                                "identities": [
+                                    {
+                                        "source": "github",
+                                        "username": "githubName2"
+                                    },
+                                    {
+                                        "source": "pivotal",
+                                        "username": "pivotalName2"
+                                    }
+                                ],
+                                "credentials": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "name": "Search project: ",
+        "method": "POST",
+        "endpoint": "/development/search",
+        "auth": "c025ff8502893fc6c5a87cf3febe4882",
+        "body": {
+            "class": {
+                "default": "class01"
+            },
+            "project": {
+                "default": "project01"
+            }
+        },
+        "response": {
+            "code": 200,
+            "message": "Scope returned",
+            "scope": {
+                "projectId": "project01",
+                "identities": [
+                    {
+                        "source": "github",
+                        "repository": "repo01",
+                        "repoOwner": "owner01"
+                    },
+                    {
+                        "source": "pivotal",
+                        "projectId": 1
+                    },
+                    {
+                        "source": "heroku",
+                        "projectId": "id1"
+                    },
+                    {
+                        "source": "travis"
+                    },
+                    {
+                        "source": "codeclimate"
+                    }
+                ],
+                "credentials": [
+                    {
+                        "source": "github",
+                        "apiKey": "githubToken"
+                    },
+                    {
+                        "source": "pivotal",
+                        "apiKey": "pivotalToken"
+                    },
+                    {
+                        "source": "heroku",
+                        "apiKey": "herokuToken"
+                    },
+                    {
+                        "source": "travis",
+                        "apiKey": "travisToken"
+                    },
+                    {
+                        "source": "codeclimate",
+                        "apiKey": "codeclimateToken"
+                    }
+                ],
+                "members": [
+                    {
+                        "memberId": 1,
+                        "identities": [
+                            {
+                                "source": "github",
+                                "username": "githubName1"
+                            },
+                            {
+                                "source": "pivotal",
+                                "username": "pivotalName1"
+                            }
+                        ],
+                        "credentials": []
+                    },
+                    {
+                        "memberId": 2,
+                        "identities": [
+                            {
+                                "source": "github",
+                                "username": "githubName2"
+                            },
+                            {
+                                "source": "pivotal",
+                                "username": "pivotalName2"
+                            }
+                        ],
+                        "credentials": []
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "name": "Search member: ",
+        "method": "POST",
+        "endpoint": "/development/search",
+        "auth": "c025ff8502893fc6c5a87cf3febe4882",
+        "body": {
+            "class": {
+                "default": "class01"
+            },
+            "project": {
+                "default": "project01"
+            },
+            "member": {
+                "default": 2
+            }
+        },
+        "response": {
+            "code": 200,
+            "message": "Scope returned",
+            "scope": {
+                "memberId": 2,
+                "identities": [
+                    {
+                        "source": "github",
+                        "username": "githubName2"
+                    },
+                    {
+                        "source": "pivotal",
+                        "username": "pivotalName2"
+                    }
+                ],
+                "credentials": []
+            }
+        }
+    }
+]

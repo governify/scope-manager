@@ -26,3 +26,7 @@ process.on('SIGTERM', function onSigterm () {
 const shutdown = () => {
   server.undeploy();
 };
+
+module.exports = {
+  shutdown: shutdown
+};

@@ -1,0 +1,326 @@
+[
+    {
+        "name": "Invalid ScopeId: ",
+        "method": "GET",
+        "endpoint": "/development/class39",
+        "body": {},
+        "response": {
+            "code": 404,
+            "message": "Scope not found"
+        }
+    },
+    {
+        "name": "Invalid ProjectId: ",
+        "method": "GET",
+        "endpoint": "/development/class01/project38",
+        "body": {},
+        "response": {
+            "code": 404,
+            "message": "Scope not found"
+        }
+    },
+    {
+        "name": "Invalid MemberId: ",
+        "method": "GET",
+        "endpoint": "/development/class01/project01/member100",
+        "body": {},
+        "response": {
+            "code": 404,
+            "message": "Scope not found"
+        }
+    },
+    {
+        "name": "Empty Body: ",
+        "method": "POST",
+        "endpoint": "/development/generate",
+        "body": {},
+        "response": {
+            "code": 400,
+            "message": "Request body is empty"
+        }
+    },
+    {
+        "name": "Invalid CourseId: ",
+        "method": "POST",
+        "endpoint": "/development/generate",
+        "body": {
+            "courseId": "class34",
+            "repoList": [
+                "this_is_not_a_valid_url"
+            ]
+        },
+        "response": {
+            "code": 403,
+            "message": "Course does not exist"
+        }
+    },
+    {
+        "name": "Invalid Url: ",
+        "method": "POST",
+        "endpoint": "/development/generate",
+        "body": {
+            "courseId": "class01",
+            "repoList": [
+                "this_is_not_a_valid_url"
+            ]
+        },
+        "response": {
+            "code": 200,
+            "message": "projects returned",
+            "projects": [
+                {
+                    "projectURL": "this_is_not_a_valid_url",
+                    "errors": [
+                        "Wrong URL, it should be a GitHub URL."
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "name": "Invalid ProjectUrl: ",
+        "method": "POST",
+        "endpoint": "/development/generate",
+        "body": {
+            "courseId": "class01",
+            "repoList": [
+                "https://github.com/this/is_an_invalid_project"
+            ]
+        },
+        "response": {
+            "code": 200,
+            "message": "projects returned",
+            "projects": [
+                {
+                    "projectURL": "https://github.com/this/is_an_invalid_project",
+                    "errors": [
+                        "Github Repo URL not valid or Info.yml file not found!"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "name": "Invalid YML File: ",
+        "method": "POST",
+        "endpoint": "/development/generate",
+        "body": {
+            "courseId": "class01",
+            "repoList": [
+                "https://github.com/governifyauditor/audited-project-template"
+            ]
+        },
+        "response": {
+            "code": 200,
+            "message": "projects returned",
+            "projects": [
+                {
+                    "projectURL": "https://github.com/governifyauditor/audited-project-template",
+                    "errors": [
+                        "Field must be an URL: identities.github.url",
+                        "Field must be an URL: identities.pivotal.url",
+                        "Field must be an URL: identities.heroku.url",
+                        "Field must be an URL: identities.travis.url",
+                        "Field must be an URL: identities.codeclimate.url",
+                        "Wrong Url: identities.heroku.url. Should follow the following patter: 'https://' + appId + 'herokuapp.com'",
+                        "Wrong Url or private project. If problem persists, please contact Governify administrator: identities.pivotal.url"
+                    ],
+                    "infoYml": {
+                        "name": "string",
+                        "owner": "string",
+                        "teamId": "string",
+                        "identities": {
+                            "github": {
+                                "url": "url"
+                            },
+                            "pivotal": {
+                                "url": "url"
+                            },
+                            "heroku": {
+                                "url": "url"
+                            },
+                            "travis": {
+                                "url": "url"
+                            },
+                            "codeclimate": {
+                                "url": "url"
+                            }
+                        },
+                        "members": {
+                            "member": {
+                                "name": "string",
+                                "surname": "string",
+                                "githubUsername": "string"
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "name": "Empty Body: ",
+        "method": "POST",
+        "endpoint": "/development/check",
+        "body": {},
+        "response": {
+            "code": 400,
+            "message": "Request body is empty"
+        }
+    },
+    {
+        "name": "Invalid Url: ",
+        "method": "POST",
+        "endpoint": "/development/check",
+        "body": {
+            "repoList": [
+                "this_is_not_a_valid_url"
+            ]
+        },
+        "response": {
+            "code": 200,
+            "message": "projects returned",
+            "projects": [
+                {
+                    "projectURL": "this_is_not_a_valid_url",
+                    "errors": [
+                        "Wrong URL, it should be a GitHub URL."
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "name": "Invalid ProjectUrl: ",
+        "method": "POST",
+        "endpoint": "/development/check",
+        "body": {
+            "repoList": [
+                "https://github.com/this/is_an_invalid_project"
+            ]
+        },
+        "response": {
+            "code": 200,
+            "message": "projects returned",
+            "projects": [
+                {
+                    "projectURL": "https://github.com/this/is_an_invalid_project",
+                    "errors": [
+                        "Github Repo URL not valid or Info.yml file not found!"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "name": "Invalid YML File: ",
+        "method": "POST",
+        "endpoint": "/development/check",
+        "body": {
+            "repoList": [
+                "https://github.com/governifyauditor/audited-project-template"
+            ]
+        },
+        "response": {
+            "code": 200,
+            "message": "projects returned",
+            "projects": [
+                {
+                    "projectURL": "https://github.com/governifyauditor/audited-project-template",
+                    "errors": [
+                        "Field must be an URL: identities.github.url",
+                        "Field must be an URL: identities.pivotal.url",
+                        "Field must be an URL: identities.heroku.url",
+                        "Field must be an URL: identities.travis.url",
+                        "Field must be an URL: identities.codeclimate.url",
+                        "Wrong Url: identities.heroku.url. Should follow the following patter: 'https://' + appId + 'herokuapp.com'",
+                        "Wrong Url or private project. If problem persists, please contact Governify administrator: identities.pivotal.url"
+                    ],
+                    "infoYml": {
+                        "name": "string",
+                        "owner": "string",
+                        "teamId": "string",
+                        "identities": {
+                            "github": {
+                                "url": "url"
+                            },
+                            "pivotal": {
+                                "url": "url"
+                            },
+                            "heroku": {
+                                "url": "url"
+                            },
+                            "travis": {
+                                "url": "url"
+                            },
+                            "codeclimate": {
+                                "url": "url"
+                            }
+                        },
+                        "members": {
+                            "member": {
+                                "name": "string",
+                                "surname": "string",
+                                "githubUsername": "string"
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "name": "Course Not Found: ",
+        "method": "POST",
+        "endpoint": "/development/search",
+        "auth": "c025ff8502893fc6c5a87cf3febe4882",
+        "body": {
+            "class": {
+                "default": "class62"
+            }
+        },
+        "response": {
+            "code": 404,
+            "message": "Scope not found"
+        }
+    },
+    {
+        "name": "Project Not Found: ",
+        "method": "POST",
+        "endpoint": "/development/search",
+        "auth": "c025ff8502893fc6c5a87cf3febe4882",
+        "body": {
+            "class": {
+                "default": "class01"
+            },
+            "project": {
+                "default": "project38"
+            }
+        },
+        "response": {
+            "code": 404,
+            "message": "Scope not found"
+        }
+    },
+    {
+        "name": "Member Not Found: ",
+        "method": "POST",
+        "endpoint": "/development/search",
+        "auth": "c025ff8502893fc6c5a87cf3febe4882",
+        "body": {
+            "class": {
+                "default": "class01"
+            },
+            "project": {
+                "default": "project01"
+            },
+            "member": {
+                "default": 12921
+            }
+        },
+        "response": {
+            "code": 404,
+            "message": "Scope not found"
+        }
+    }
+]
