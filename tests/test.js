@@ -1,8 +1,9 @@
-const http = require('../index');
+const server = require('../server');
 
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
+const sinon = require('sinon');
 const governify = require('governify-commons');
 
 const apiUrl = "http://localhost:5700/api/v1/scopes";
@@ -13,6 +14,23 @@ const keep = [];
 
 
 describe('Tests', function () {
+
+  before((done) => {
+    governify.init().then((commonsMiddleware) => {
+      server.deploy('test', commonsMiddleware).then( () => {
+        governify.httpClient.setRequestLogging(false);
+        sinon.stub(console);
+        done();
+      }).catch(err2 => {
+        console.log(err2.message);
+        done(err2);
+      })
+    }).catch(err1 => {
+      console.log(err1.message);
+      done(err1);
+    });
+  });
+
   describe('#apiRestControllersTestRequest()', function() {
     this.retries(3)
     apiRestControllersTest('/testRequests.json');
@@ -24,7 +42,7 @@ describe('Tests', function () {
   });
 
   after((done) => {
-    http.shutdown(done);
+    server.undeploy(done);
   });
 });
 
