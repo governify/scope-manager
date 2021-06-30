@@ -1,6 +1,6 @@
 [
     {
-        "name": "",
+        "name": "Unauth GET all courses: ",
         "method": "GET",
         "endpoint": "/development/courses",
         "body": {},
@@ -41,7 +41,103 @@
         }
     },
     {
-        "name": "",
+        "name": "Auth GET all courses: ",
+        "method": "GET",
+        "endpoint": "/development/courses",
+        "auth": "c025ff8502893fc6c5a87cf3febe4882",
+        "body": {},
+        "response": {
+            "code": 200,
+            "message": "Scope returned",
+            "scope": [
+                {
+                    "classId": "class01",
+                    "identities": [],
+                    "credentials": [],
+                    "projects": [
+                        {
+                            "projectId": "project01",
+                            "identities": [
+                                {
+                                    "source": "github",
+                                    "repository": "repo01",
+                                    "repoOwner": "owner01"
+                                },
+                                {
+                                    "source": "pivotal",
+                                    "projectId": 1
+                                },
+                                {
+                                    "source": "heroku",
+                                    "projectId": "id1"
+                                },
+                                {
+                                    "source": "travis"
+                                },
+                                {
+                                    "source": "codeclimate"
+                                }
+                            ],
+                            "credentials": [
+                                {
+                                    "source": "github",
+                                    "apiKey": "githubToken"
+                                },
+                                {
+                                    "source": "pivotal",
+                                    "apiKey": "pivotalToken"
+                                },
+                                {
+                                    "source": "heroku",
+                                    "apiKey": "herokuToken"
+                                },
+                                {
+                                    "source": "travis",
+                                    "apiKey": "travisToken"
+                                },
+                                {
+                                    "source": "codeclimate",
+                                    "apiKey": "codeclimateToken"
+                                }
+                            ],
+                            "members": [
+                                {
+                                    "memberId": "1",
+                                    "identities": [
+                                        {
+                                            "source": "github",
+                                            "username": "githubName1"
+                                        },
+                                        {
+                                            "source": "pivotal",
+                                            "username": "pivotalName1"
+                                        }
+                                    ],
+                                    "credentials": []
+                                },
+                                {
+                                    "memberId": "2",
+                                    "identities": [
+                                        {
+                                            "source": "github",
+                                            "username": "githubName2"
+                                        },
+                                        {
+                                            "source": "pivotal",
+                                            "username": "pivotalName2"
+                                        }
+                                    ],
+                                    "credentials": []
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "name": "Unauth GET course: ",
         "method": "GET",
         "endpoint": "/development/class01",
         "body": {},
@@ -80,7 +176,101 @@
         }
     },
     {
-        "name": "",
+        "name": "Auth GET course: ",
+        "method": "GET",
+        "endpoint": "/development/class01",
+        "auth": "c025ff8502893fc6c5a87cf3febe4882",
+        "body": {},
+        "response": {
+            "code": 200,
+            "message": "Scope returned",
+            "scope": {
+                "classId": "class01",
+                "identities": [],
+                "credentials": [],
+                "projects": [
+                    {
+                        "projectId": "project01",
+                        "identities": [
+                            {
+                                "source": "github",
+                                "repository": "repo01",
+                                "repoOwner": "owner01"
+                            },
+                            {
+                                "source": "pivotal",
+                                "projectId": 1
+                            },
+                            {
+                                "source": "heroku",
+                                "projectId": "id1"
+                            },
+                            {
+                                "source": "travis"
+                            },
+                            {
+                                "source": "codeclimate"
+                            }
+                        ],
+                        "credentials": [
+                            {
+                                "source": "github",
+                                "apiKey": "githubToken"
+                            },
+                            {
+                                "source": "pivotal",
+                                "apiKey": "pivotalToken"
+                            },
+                            {
+                                "source": "heroku",
+                                "apiKey": "herokuToken"
+                            },
+                            {
+                                "source": "travis",
+                                "apiKey": "travisToken"
+                            },
+                            {
+                                "source": "codeclimate",
+                                "apiKey": "codeclimateToken"
+                            }
+                        ],
+                        "members": [
+                            {
+                                "memberId": "1",
+                                "identities": [
+                                    {
+                                        "source": "github",
+                                        "username": "githubName1"
+                                    },
+                                    {
+                                        "source": "pivotal",
+                                        "username": "pivotalName1"
+                                    }
+                                ],
+                                "credentials": []
+                            },
+                            {
+                                "memberId": "2",
+                                "identities": [
+                                    {
+                                        "source": "github",
+                                        "username": "githubName2"
+                                    },
+                                    {
+                                        "source": "pivotal",
+                                        "username": "pivotalName2"
+                                    }
+                                ],
+                                "credentials": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "name": "Unauth GET projects: ",
         "method": "GET",
         "endpoint": "/development/class01/projects",
         "body": {},
@@ -114,7 +304,96 @@
         }
     },
     {
-        "name": "",
+        "name": "Auth GET projects: ",
+        "method": "GET",
+        "endpoint": "/development/class01/projects",
+        "auth": "c025ff8502893fc6c5a87cf3febe4882",
+        "body": {},
+        "response": {
+            "code": 200,
+            "message": "Scope returned",
+            "scope": [
+                {
+                    "projectId": "project01",
+                    "identities": [
+                        {
+                            "source": "github",
+                            "repository": "repo01",
+                            "repoOwner": "owner01"
+                        },
+                        {
+                            "source": "pivotal",
+                            "projectId": 1
+                        },
+                        {
+                            "source": "heroku",
+                            "projectId": "id1"
+                        },
+                        {
+                            "source": "travis"
+                        },
+                        {
+                            "source": "codeclimate"
+                        }
+                    ],
+                    "credentials": [
+                        {
+                            "source": "github",
+                            "apiKey": "githubToken"
+                        },
+                        {
+                            "source": "pivotal",
+                            "apiKey": "pivotalToken"
+                        },
+                        {
+                            "source": "heroku",
+                            "apiKey": "herokuToken"
+                        },
+                        {
+                            "source": "travis",
+                            "apiKey": "travisToken"
+                        },
+                        {
+                            "source": "codeclimate",
+                            "apiKey": "codeclimateToken"
+                        }
+                    ],
+                    "members": [
+                        {
+                            "memberId": "1",
+                            "identities": [
+                                {
+                                    "source": "github",
+                                    "username": "githubName1"
+                                },
+                                {
+                                    "source": "pivotal",
+                                    "username": "pivotalName1"
+                                }
+                            ],
+                            "credentials": []
+                        },
+                        {
+                            "memberId": "2",
+                            "identities": [
+                                {
+                                    "source": "github",
+                                    "username": "githubName2"
+                                },
+                                {
+                                    "source": "pivotal",
+                                    "username": "pivotalName2"
+                                }
+                            ],
+                            "credentials": []
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "name": "Unauth GET project: ",
         "method": "GET",
         "endpoint": "/development/class01/project01",
         "body": {},
@@ -146,7 +425,94 @@
         }
     },
     {
-        "name": "",
+        "name": "Auth GET project: ",
+        "method": "GET",
+        "endpoint": "/development/class01/project01",
+        "auth": "c025ff8502893fc6c5a87cf3febe4882",
+        "body": {},
+        "response": {
+            "code": 200,
+            "message": "Scope returned",
+            "scope": {
+                "projectId": "project01",
+                "identities": [
+                    {
+                        "source": "github",
+                        "repository": "repo01",
+                        "repoOwner": "owner01"
+                    },
+                    {
+                        "source": "pivotal",
+                        "projectId": 1
+                    },
+                    {
+                        "source": "heroku",
+                        "projectId": "id1"
+                    },
+                    {
+                        "source": "travis"
+                    },
+                    {
+                        "source": "codeclimate"
+                    }
+                ],
+                "credentials": [
+                    {
+                        "source": "github",
+                        "apiKey": "githubToken"
+                    },
+                    {
+                        "source": "pivotal",
+                        "apiKey": "pivotalToken"
+                    },
+                    {
+                        "source": "heroku",
+                        "apiKey": "herokuToken"
+                    },
+                    {
+                        "source": "travis",
+                        "apiKey": "travisToken"
+                    },
+                    {
+                        "source": "codeclimate",
+                        "apiKey": "codeclimateToken"
+                    }
+                ],
+                "members": [
+                    {
+                        "memberId": "1",
+                        "identities": [
+                            {
+                                "source": "github",
+                                "username": "githubName1"
+                            },
+                            {
+                                "source": "pivotal",
+                                "username": "pivotalName1"
+                            }
+                        ],
+                        "credentials": []
+                    },
+                    {
+                        "memberId": "2",
+                        "identities": [
+                            {
+                                "source": "github",
+                                "username": "githubName2"
+                            },
+                            {
+                                "source": "pivotal",
+                                "username": "pivotalName2"
+                            }
+                        ],
+                        "credentials": []
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "name": "Unauth GET members: ",
         "method": "GET",
         "endpoint": "/development/class01/project01/members",
         "body": {},
@@ -157,7 +523,73 @@
         }
     },
     {
-        "name": "",
+        "name": "Auth GET members: ",
+        "method": "GET",
+        "endpoint": "/development/class01/project01/members",
+        "auth": "c025ff8502893fc6c5a87cf3febe4882",
+        "body": {},
+        "response": {
+            "code": 200,
+            "message": "Scope returned",
+            "scope": [
+                {
+                    "memberId": "1",
+                    "identities": [
+                        {
+                            "source": "github",
+                            "username": "githubName1"
+                        },
+                        {
+                            "source": "pivotal",
+                            "username": "pivotalName1"
+                        }
+                    ],
+                    "credentials": []
+                },
+                {
+                    "memberId": "2",
+                    "identities": [
+                        {
+                            "source": "github",
+                            "username": "githubName2"
+                        },
+                        {
+                            "source": "pivotal",
+                            "username": "pivotalName2"
+                        }
+                    ],
+                    "credentials": []
+                }
+            ]
+        }
+    },
+    {
+        "name": "Auth GET member: ",
+        "method": "GET",
+        "endpoint": "/development/class01/project01/1",
+        "auth": "c025ff8502893fc6c5a87cf3febe4882",
+        "body": {},
+        "response": {
+            "code": 200,
+            "message": "Scope returned",
+            "scope": {
+                "memberId": "1",
+                "identities": [
+                    {
+                        "source": "github",
+                        "username": "githubName1"
+                    },
+                    {
+                        "source": "pivotal",
+                        "username": "pivotalName1"
+                    }
+                ],
+                "credentials": []
+            }
+        }
+    },
+    {
+        "name": "Generate POST: ",
         "method": "POST",
         "endpoint": "/development/generate",
         "body": {
@@ -220,7 +652,7 @@
         }
     },
     {
-        "name": "",
+        "name": "Check POST: ",
         "method": "POST",
         "endpoint": "/development/check",
         "body": {
@@ -343,7 +775,7 @@
                             ],
                             "members": [
                                 {
-                                    "memberId": 1,
+                                    "memberId": "1",
                                     "identities": [
                                         {
                                             "source": "github",
@@ -357,7 +789,7 @@
                                     "credentials": []
                                 },
                                 {
-                                    "memberId": 2,
+                                    "memberId": "2",
                                     "identities": [
                                         {
                                             "source": "github",
@@ -442,7 +874,7 @@
                         ],
                         "members": [
                             {
-                                "memberId": 1,
+                                "memberId": "1",
                                 "identities": [
                                     {
                                         "source": "github",
@@ -456,7 +888,7 @@
                                 "credentials": []
                             },
                             {
-                                "memberId": 2,
+                                "memberId": "2",
                                 "identities": [
                                     {
                                         "source": "github",
@@ -538,7 +970,7 @@
                 ],
                 "members": [
                     {
-                        "memberId": 1,
+                        "memberId": "1",
                         "identities": [
                             {
                                 "source": "github",
@@ -552,7 +984,7 @@
                         "credentials": []
                     },
                     {
-                        "memberId": 2,
+                        "memberId": "2",
                         "identities": [
                             {
                                 "source": "github",
@@ -582,14 +1014,14 @@
                 "default": "project01"
             },
             "member": {
-                "default": 2
+                "default": "2"
             }
         },
         "response": {
             "code": 200,
             "message": "Scope returned",
             "scope": {
-                "memberId": 2,
+                "memberId": "2",
                 "identities": [
                     {
                         "source": "github",

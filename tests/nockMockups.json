@@ -1,0 +1,92 @@
+[
+    {
+        "name": "GET info.yml",
+        "type": "GET",
+        "requestAPI": "https://raw.githubusercontent.com",
+        "requestEndpoint": "/governifyauditor/goldenflow-showcase-project/main/info.yml",
+        "response": {
+            "code": "200",
+            "data": "project:\r\n  name: 'Golden Flow Showcase Project'\r\n  owner: 'governify'\r\n  teamId: '123'\r\n  notifications:\r\n    slack:\r\n      url: 'https:\/\/hooks.slack.com\/services\/AAAAAA\/BBBBBBB\/CCCCCC'\r\n  identities:\r\n    pivotal:\r\n      url: 'https:\/\/www.pivotaltracker.com\/n\/projects\/2487566'\r\n    heroku:\r\n      url: 'https:\/\/goldenflow-showcase-project.herokuapp.com\/'\r\n    travis:\r\n      url: 'https:\/\/travis-ci.org\/github\/governifyauditor\/goldenflow-showcase-project'\r\n    codeclimate:\r\n      url: 'https:\/\/codeclimate.com\/github\/governifyauditor\/goldenflow-showcase-project'\r\n  members:\r\n    member1:\r\n      name: 'Governify'\r\n      surname: 'Auditor' \r\n      githubUsername: 'governifyauditor'\r\n      pivotalUsername: 'governifyauditor'\r\n      herokuEmail: 'governify.auditor@gmail.com'\r\n    member2:\r\n      name: 'Cesar'\r\n      surname: 'GP' \r\n      githubUsername: 'cesgarpas'\r\n      pivotalUsername: 'cesgarpas'\r\n      herokuEmail: 'cesgarpas@cesgarpas.com'"
+        }
+    },
+    {
+        "name": "GET bad info.yml",
+        "type": "GET",
+        "requestAPI": "https://raw.githubusercontent.com",
+        "requestEndpoint": "/governifyauditor/audited-project-template/main/info.yml",
+        "response": {
+            "code": "200",
+            "data": "project:\r\n  name: 'string'\r\n  owner: 'string'\r\n  teamId: 'string'\r\n  identities:\r\n    github:\r\n      url: 'url'\r\n    pivotal:\r\n      url: 'url'\r\n    heroku:\r\n      url: 'url'\r\n    travis:\r\n      url: 'url'\r\n    codeclimate:\r\n      url: 'url'\r\n  members:\r\n    member:\r\n      name: 'string'\r\n      surname: 'string' \r\n      githubUsername: 'string'"
+        }
+    },
+    {
+        "name": "GET info.yml template",
+        "type": "GET",
+        "requestAPI": "https://raw.githubusercontent.com",
+        "requestEndpoint": "/governify/audited-project-template/main/info.yml",
+        "response": { 
+            "code": "200",
+            "data":"project:\r\n  name: 'string'\r\n  owner: 'string'\r\n  teamId: 'string'\r\n  identities:\r\n    github:\r\n      url: 'url'\r\n    pivotal:\r\n      url: 'url'\r\n    heroku:\r\n      url: 'url'\r\n    travis:\r\n      url: 'url'\r\n    codeclimate:\r\n      url: 'url'\r\n  members:\r\n    member:\r\n      name: 'string'\r\n      surname: 'string' \r\n      githubUsername: 'string'"
+        }
+    },
+    {
+        "name": "GET 404 url",
+        "type": "GET",
+        "requestAPI": "https://raw.githubusercontent.com",
+        "requestEndpoint": "/this/is_an_invalid_project/main/info.yml",
+        "response": { 
+            "code": "404",
+            "data":"404: Not Found"
+        }
+    },
+    {
+        "name": "GET Pivotal URL",
+        "type": "GET",
+        "requestAPI": "https://www.pivotaltracker.com",
+        "requestEndpoint": "/n/projects/2487566",
+        "response": {
+            "code": "200",
+            "data": ""
+        }
+    },
+    {
+        "name": "GET Heroku URL",
+        "type": "GET",
+        "requestAPI": "https://api.heroku.com",
+        "requestEndpoint": "/apps/goldenflow-showcase-project",
+        "response": {
+            "code": "401",
+            "data": ""
+        }
+    },
+    {
+        "name": "GET GithubUsername1 URL",
+        "type": "GET",
+        "requestAPI": "https://github.com",
+        "requestEndpoint": "/governifyauditor",
+        "response": {
+            "code": "200",
+            "data": ""
+        }
+    },
+    {
+        "name": "GET GithubUsername2 URL",
+        "type": "GET",
+        "requestAPI": "https://github.com",
+        "requestEndpoint": "/cesgarpas",
+        "response": {
+            "code": "200",
+            "data": ""
+        }
+    },
+    {
+        "name": "GET GithubUsername3 URL",
+        "type": "GET",
+        "requestAPI": "https://github.com",
+        "requestEndpoint": "/string",
+        "response": {
+            "code": "200",
+            "data": ""
+        }
+    }
+]

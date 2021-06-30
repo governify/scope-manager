@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const sinon = require('sinon');
 const governify = require('governify-commons');
+const nockController = require('./nockController')
 
 const apiUrl = "http://localhost:5700/api/v1/scopes";
 
@@ -19,8 +20,10 @@ describe('Tests', function () {
     governify.init().then((commonsMiddleware) => {
       server.deploy('test', commonsMiddleware).then( () => {
         governify.httpClient.setRequestLogging(false);
-        sinon.stub(console);
-        done();
+        nockController.instantiateMockups('test').then(() => {
+          sinon.stub(console);
+          done();
+        }) 
       }).catch(err2 => {
         console.log(err2.message);
         done(err2);
@@ -32,12 +35,10 @@ describe('Tests', function () {
   });
 
   describe('#apiRestControllersTestRequest()', function() {
-    this.retries(3)
     apiRestControllersTest('/testRequests.json');
   });
     
   describe('#apiRestControllersNegativeTestRequest()', function(){
-    this.retries(3)
     apiRestControllersTest('/negativeTestRequests.json');
   });
 
@@ -60,6 +61,7 @@ function apiRestControllersTest(JSONfile) {
             data: testRequest.body,
             headers: {
               'User-Agent': 'request',
+              'Content-Type': 'application/json',
               'Authorization' : testRequest.auth ?? ''
             }
           };
@@ -70,7 +72,7 @@ function apiRestControllersTest(JSONfile) {
             assert.deepStrictEqual(response.data.projects, testRequest.response.projects);
             done();
           }).catch(err => {
-            assert.fail('Error on request:');
+            assert.fail('Error on request:' + err);
           })
         } catch(err){
           assert.fail('Error when sending request');
@@ -78,8 +80,4 @@ function apiRestControllersTest(JSONfile) {
       });
     }
   }
-}
-
-function apiRestNegativeControllersTest() {
-  const testRequests = JSON.parse(fs.readFileSync(path.join(__dirname,'/negativeTestRequests.json')));
 }
