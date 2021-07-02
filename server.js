@@ -14,10 +14,11 @@ const deploy = (env, commonsMiddleware) => {
       app.use(bodyParser.json({
         strict: false
       }));
-      app.use(commonsMiddleware);
-
       const cors = require('cors');
       app.use(cors());
+      
+      app.use(commonsMiddleware);
+
 
       const oasTools = require('oas-tools');
       const jsyaml = require('js-yaml');
