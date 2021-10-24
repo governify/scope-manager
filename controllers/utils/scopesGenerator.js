@@ -108,6 +108,7 @@ const checkFromGithubList = (checkRequest) => {
 };
 
 const checkFromGitLabList = (checkRequest) => {
+  /*eslint-disable */
   return new Promise(async (resolve, reject) => {
     /* eslint-enable */
     try {
@@ -117,18 +118,13 @@ const checkFromGitLabList = (checkRequest) => {
       const promises = [];
 
       for (const repoURL of checkRequest.repoList) {
-        let gitlabOwner, gitlabRepo;
-
-        try {
-          gitlabOwner = repoURL.split('gitlab.com/')[1].split('/')[0];
-          gitlabRepo = repoURL.split('gitlab.com/')[1].split('/')[1];
-        } catch (err) {
+        if (!repoURL.includes('gitlab.com/')) {
           missingAndValidation[repoURL] = { missingValues: [], wrongFormatValues: ['Wrong URL, it should be a GitLab URL.'] };
           wrongAPIs[repoURL] = { invalidApiValues: [] };
           continue;
         }
-        
-        await getInfoYamlGitlab(repoURL+'/-/raw/', 'main').then((getInfoYamlResponse) => {
+
+        await getInfoYamlGitlab(repoURL + '/-/raw/', 'main').then((getInfoYamlResponse) => {
           if (getInfoYamlResponse === undefined) {
             missingAndValidation[repoURL] = { missingValues: ['Github Repo URL not valid or Info.yml file not found!'], wrongFormatValues: [] };
             wrongAPIs[repoURL] = { invalidApiValues: [] };
@@ -139,7 +135,7 @@ const checkFromGitLabList = (checkRequest) => {
 
               // Missing and format
               const missingAndValidationPromise = new Promise((resolve, reject) => {
-                getMissingAndValidationInfo(infoJson,true).then((projectValidation) => {
+                getMissingAndValidationInfo(infoJson, true).then((projectValidation) => {
                   missingAndValidation[repoURL] = { ...projectValidation };
                   resolve();
                 }).catch(err => {
@@ -193,10 +189,10 @@ const checkFromGitLabList = (checkRequest) => {
       reject(err);
     }
   });
-}
+};
 
 // Missing and validation
-const getMissingAndValidationInfo = (infoObject,gitlab) => {
+const getMissingAndValidationInfo = (infoObject, gitlab) => {
   return new Promise((resolve, reject) => {
     const missingAttributes = [];
     const wrongAttributes = [];
@@ -212,8 +208,8 @@ const getMissingAndValidationInfo = (infoObject,gitlab) => {
               missingAttributes.push('Missing mandatory parameter: ' + key1);
             } else {
               for (const key2 of Object.keys(infoObject[key1])) {
-                if(gitlab && originalInfoObject[key1][key1 === 'members' ? 'member' : key2]['githubUsername']){
-                  delete Object.assign(originalInfoObject[key1][key1 === 'members' ? 'member' : key2],{['gitlabUsername']:originalInfoObject[key1][key1 === 'members' ? 'member' : key2]['githubUsername']})['githubUsername']
+                if (gitlab && originalInfoObject[key1][key1 === 'members' ? 'member' : key2].githubUsername) {
+                  delete Object.assign(originalInfoObject[key1][key1 === 'members' ? 'member' : key2], { gitlabUsername: originalInfoObject[key1][key1 === 'members' ? 'member' : key2].githubUsername }).githubUsername;
                 }
                 for (const key3 of Object.keys(originalInfoObject[key1][key1 === 'members' ? 'member' : key2])) {
                   const missingAndValidation = checkField(infoObject[key1][key2][key3], originalInfoObject[key1][key1 === 'members' ? 'member' : key2][key3], 'identities.' + key2 + '.' + key3);
@@ -718,7 +714,7 @@ const getInfoYaml = (url, branch) => {
 
 const getInfoYamlGitlab = (url, branch) => {
   return new Promise((resolve, reject) => {
-    governify.httpClient.get(url + branch + '/' + infoFilename, { headers: { "PRIVATE-TOKEN": process.env.KEY_GITLAB ? process.env.KEY_GITLAB : '' } }).then((response) => {
+    governify.httpClient.get(url + branch + '/' + infoFilename, { headers: { 'PRIVATE-TOKEN': process.env.KEY_GITLAB ? process.env.KEY_GITLAB : '' } }).then((response) => {
       resolve(response);
     }).catch(() => {
       if (branch !== 'master') {
