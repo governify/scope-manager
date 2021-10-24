@@ -333,12 +333,20 @@ const isAuthorized = (token) => {
 
 // Scope generator
 
-const checkInfoYml = (githubProjectsList) => {
-  return scopesGenerator.checkFromGithubList(githubProjectsList);
+const checkInfoYml = (projectList) => {
+  if (!projectList.gitlab) {
+    return scopesGenerator.checkFromGithubList(projectList);
+  }else{
+    return scopesGenerator.checkFromGitLabList(projectList);
+  }
 };
 
 const generateScope = (generationRequest) => {
-  return scopesGenerator.generateFromGithubList(generationRequest);
+  if (!generationRequest.gitlab) {
+    return scopesGenerator.generateFromGithubList(generationRequest);
+  }else{
+    return scopesGenerator.generateFromGitLabList(generationRequest);
+  }
 };
 
 // Other methods
