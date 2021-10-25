@@ -334,7 +334,7 @@ const isAuthorized = (token) => {
 // Scope generator
 
 const checkInfoYml = (projectList) => {
-  if (!projectList.gitlab) {
+  if (!projectList.repoList.some((val)=>val.includes('gitlab.com'))) {
     return scopesGenerator.checkFromGithubList(projectList);
   } else {
     return scopesGenerator.checkFromGitLabList(projectList);
@@ -342,7 +342,7 @@ const checkInfoYml = (projectList) => {
 };
 
 const generateScope = (generationRequest) => {
-  if (!generationRequest.gitlab) {
+  if (!generationRequest.repoList.some((val)=>val.includes('gitlab.com'))) {
     return scopesGenerator.generateFromGithubList(generationRequest);
   } else {
     return scopesGenerator.generateFromGitLabList(generationRequest);
