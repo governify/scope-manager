@@ -196,7 +196,7 @@ const getMissingAndValidationInfo = (infoObject, gitlab) => {
   return new Promise((resolve, reject) => {
     const missingAttributes = [];
     const wrongAttributes = [];
-    const url = gitlab?'https://gitlab.com/governify_auditor/goldenflow-showcase-project/-/raw/main/info-gitlab-template.yml':'https://raw.githubusercontent.com/governify/audited-project-template/main/info.yml'
+    const url = gitlab ? 'https://gitlab.com/governify_auditor/goldenflow-showcase-project/-/raw/main/info-gitlab-template.yml' : 'https://raw.githubusercontent.com/governify/audited-project-template/main/info.yml';
     governify.httpClient.get(url).then((response) => {
       const originalInfoObject = jsyaml.load(response.data).project;
       for (const key1 of Object.keys(originalInfoObject)) {
@@ -207,9 +207,6 @@ const getMissingAndValidationInfo = (infoObject, gitlab) => {
               missingAttributes.push('Missing mandatory parameter: ' + key1);
             } else {
               for (const key2 of Object.keys(infoObject[key1])) {
-                console.log("1",key2)
-                console.log("2",infoObject[key1])
-                console.log("3",originalInfoObject[key1])
                 for (const key3 of Object.keys(originalInfoObject[key1][key1 === 'members' ? 'member' : key2])) {
                   const missingAndValidation = checkField(infoObject[key1][key2][key3], originalInfoObject[key1][key1 === 'members' ? 'member' : key2][key3], 'identities.' + key2 + '.' + key3);
                   if (missingAndValidation === undefined) {
