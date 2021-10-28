@@ -1,3 +1,30 @@
+# [1.5.0](https://github.com/governify/scope-manager/compare/v1.4.0...v1.5.0) (2021-10-28)
+
+
+### Bug Fixes
+
+* Changed local scopes.json members Id to str ([0c09a11](https://github.com/governify/scope-manager/commit/0c09a11411df3f5d1af40e31b41f83b759e5209b))
+* commons middleware ([26a0194](https://github.com/governify/scope-manager/commit/26a019482068499abcf85f57b23669cbfcf4c9fe))
+* conflicting package-lock resolved ([d558b58](https://github.com/governify/scope-manager/commit/d558b5804b23f45a4e2dc34e2ac8bc2d91ef0cf1))
+* cors before commons middleware ([a6ff7f0](https://github.com/governify/scope-manager/commit/a6ff7f0e73ad812a6aaecd7fe9cdc9d439ae7c31))
+* gitlab ([3e324d3](https://github.com/governify/scope-manager/commit/3e324d3b05f3c7c51ca9d9b4c7da4b509b166c99))
+* lint ([c17193a](https://github.com/governify/scope-manager/commit/c17193aea749c001f79469b022b883fec4f3d66c))
+* lint fix ([5e3aac0](https://github.com/governify/scope-manager/commit/5e3aac01c614acea41c803f1f5bb69c8b17a062a))
+* package-lock.json ([829d43d](https://github.com/governify/scope-manager/commit/829d43dff1961ffbb126c35592898a33cac660ed))
+* rm collectors from external infrastructure ([aa6c007](https://github.com/governify/scope-manager/commit/aa6c007732c6e8e1f37ae624b4b5d6a6c82c39f7))
+* Using server+sinon instead of index for tests ([e159c26](https://github.com/governify/scope-manager/commit/e159c262f58dbb168151e04d06517631faa3c55b))
+
+
+### Features
+
+* commons logger ([8097033](https://github.com/governify/scope-manager/commit/8097033960a9270f15edf9aa06117b3de40533e5))
+* gitlab ([2322c40](https://github.com/governify/scope-manager/commit/2322c4095694ce805f9d94d44cf53fda9c77c029))
+* Tests implementation for all endpoints ([a4ce960](https://github.com/governify/scope-manager/commit/a4ce9600420f88be12a768679a37b06c821f4a85))
+* Tests implementation for all endpoints ([55ab111](https://github.com/governify/scope-manager/commit/55ab111dfcdedf6207ba512b5731987e92361ff9))
+* update commons v1.14 ([e481b0f](https://github.com/governify/scope-manager/commit/e481b0f378d8ead035f4cf933b0bd737ea4b9810))
+
+
+
 # [1.4.0](https://github.com/governify/scope-manager/compare/v1.3.0...v1.4.0) (2021-05-24)
 
 
