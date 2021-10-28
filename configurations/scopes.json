@@ -52,7 +52,7 @@
                     ],
                     "members": [
                         {
-                            "memberId": 1,
+                            "memberId": "1",
                             "identities": [
                                 {
                                     "source": "github",
@@ -66,7 +66,7 @@
                             "credentials": []
                         },
                         {
-                            "memberId": 2,
+                            "memberId": "2",
                             "identities": [
                                 {
                                     "source": "github",

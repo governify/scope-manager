@@ -1,5 +1,6 @@
 const jsyaml = require('js-yaml');
 const governify = require('governify-commons');
+const logger = governify.getLogger().tag('scopes-generator');
 
 const utils = require('./utils');
 
@@ -51,6 +52,90 @@ const checkFromGithubList = (checkRequest) => {
               // Missing and format
               const missingAndValidationPromise = new Promise((resolve, reject) => {
                 getMissingAndValidationInfo(infoJson).then((projectValidation) => {
+                  missingAndValidation[repoURL] = { ...projectValidation };
+                  resolve();
+                }).catch(err => {
+                  logger.error(err);
+                  resolve();
+                });
+              });
+              promises.push(missingAndValidationPromise);
+
+              // Invalid API values
+              const invalidAPIValuesPromise = new Promise((resolve, reject) => {
+                getWrongAPIValues(infoJson).then((projectValidation) => {
+                  wrongAPIs[repoURL] = { ...projectValidation };
+                  resolve();
+                }).catch(err => {
+                  logger.error(err);
+                  resolve();
+                });
+              });
+              promises.push(invalidAPIValuesPromise);
+            } catch (err) {
+              missingAndValidation[repoURL] = { missingValues: [], wrongFormatValues: ['Not valid info.yml format. Check yaml syntax!'] };
+              wrongAPIs[repoURL] = { invalidApiValues: [] };
+            }
+          }
+        });
+      }
+
+      Promise.all(promises).then(() => {
+        const finalResponse = [];
+        for (const project of Object.keys(missingAndValidation)) {
+          const errorProject = {};
+          errorProject.projectURL = project;
+
+          // Errors splitted by category
+          // errorProject.errors = { ...missingAndValidation[project] };
+          // errorProject.errors.invalidApiValues = wrongAPIs[project].invalidApiValues;
+
+          // Merged errors
+          errorProject.errors = [...missingAndValidation[project].missingValues, ...missingAndValidation[project].wrongFormatValues];
+          errorProject.errors = [...errorProject.errors, ...wrongAPIs[project].invalidApiValues];
+          errorProject.infoYml = infoYmlJson[project];
+          finalResponse.push(errorProject);
+        }
+        resolve(finalResponse);
+      }).catch(err => {
+        logger.error(err);
+        reject(err);
+      });
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
+const checkFromGitLabList = (checkRequest) => {
+  /*eslint-disable */
+  return new Promise(async (resolve, reject) => {
+    /* eslint-enable */
+    try {
+      const missingAndValidation = {};
+      const wrongAPIs = {};
+      const infoYmlJson = {};
+      const promises = [];
+
+      for (const repoURL of checkRequest.repoList) {
+        if (!repoURL.includes('gitlab.com/')) {
+          missingAndValidation[repoURL] = { missingValues: [], wrongFormatValues: ['Wrong URL, it should be a GitLab URL.'] };
+          wrongAPIs[repoURL] = { invalidApiValues: [] };
+          continue;
+        }
+
+        await getInfoYamlGitlab(repoURL + '/-/raw/', 'main').then((getInfoYamlResponse) => {
+          if (getInfoYamlResponse === undefined) {
+            missingAndValidation[repoURL] = { missingValues: ['Github Repo URL not valid or Info.yml file not found!'], wrongFormatValues: [] };
+            wrongAPIs[repoURL] = { invalidApiValues: [] };
+          } else {
+            try {
+              const infoJson = jsyaml.load(getInfoYamlResponse.data).project;
+              infoYmlJson[repoURL] = infoJson;
+
+              // Missing and format
+              const missingAndValidationPromise = new Promise((resolve, reject) => {
+                getMissingAndValidationInfo(infoJson, true).then((projectValidation) => {
                   missingAndValidation[repoURL] = { ...projectValidation };
                   resolve();
                 }).catch(err => {
@@ -107,14 +192,13 @@ const checkFromGithubList = (checkRequest) => {
 };
 
 // Missing and validation
-const getMissingAndValidationInfo = (infoObject) => {
+const getMissingAndValidationInfo = (infoObject, gitlab) => {
   return new Promise((resolve, reject) => {
     const missingAttributes = [];
     const wrongAttributes = [];
-
-    governify.httpClient.get('https://raw.githubusercontent.com/governify/audited-project-template/main/info.yml').then((response) => {
+    const url = gitlab ? 'https://gitlab.com/governify_auditor/goldenflow-showcase-project/-/raw/main/info-gitlab-template.yml' : 'https://raw.githubusercontent.com/governify/audited-project-template/main/info.yml';
+    governify.httpClient.get(url).then((response) => {
       const originalInfoObject = jsyaml.load(response.data).project;
-
       for (const key1 of Object.keys(originalInfoObject)) {
         switch (key1) {
           case 'members':
@@ -206,7 +290,7 @@ const getWrongAPIValues = (infoYml) => {
           }
           resolve();
         }).catch(err => {
-          console.log(err);
+          logger.error(err);
           resolve();
         });
       });
@@ -233,7 +317,7 @@ const getWrongAPIValues = (infoYml) => {
             }
             resolve();
           }).catch(err => {
-            console.log(err);
+            logger.error(err);
             resolve();
           });
         } else {
@@ -256,7 +340,7 @@ const getWrongAPIValues = (infoYml) => {
             }
             resolve();
           }).catch(err => {
-            console.log(err);
+            logger.error(err);
             resolve();
           });
         });
@@ -268,7 +352,7 @@ const getWrongAPIValues = (infoYml) => {
     Promise.all(promises).then(() => {
       resolve({ invalidApiValues: wrongAPIs });
     }).catch(err => {
-      console.log(err);
+      logger.error(err);
       reject(err);
     });
   });
@@ -417,7 +501,7 @@ const generateFromGithubList = (generationRequest) => {
             }
           }
         } catch (err) {
-          console.log(err);
+          logger.error(err);
         }
       }
 
@@ -441,7 +525,169 @@ const generateFromGithubList = (generationRequest) => {
       // Return response
       resolve(projects);
     }).catch(err => {
-      console.log(err);
+      logger.error(err);
+      reject(err);
+    });
+  });
+};
+
+const generateFromGitLabList = (generationRequest) => {
+  return new Promise((resolve, reject) => {
+    const courseId = generationRequest.courseId;
+    const courseScope = utils.getCourse(courseId);
+
+    if (!courseScope) {
+      return reject(new Error('Course does not exist.'));
+      // Creates if does not exist
+      /* courseScope = {
+        classId: courseId,
+        identities: [],
+        credentials: [],
+        projects: []
+      }; */
+    }
+
+    const projects = [];
+
+    checkFromGitLabList(generationRequest).then((checkedProjects) => {
+      for (const project of checkedProjects) {
+        try {
+          if (project.errors.length !== 0) {
+            projects.push(project);
+          } else {
+            // Prepare project object
+            const newProjectObject = { ...project };
+            delete newProjectObject.errors;
+
+            // Create new scope
+            const infoJson = project.infoYml;
+
+            const gitlabOwner = project.projectURL.split('gitlab.com/')[1].split('/')[0];
+            const gitlabRepo = project.projectURL.split('gitlab.com/')[1].split('/')[1];
+
+            infoJson.projectId = courseId + '-GH-' + gitlabOwner + '_' + gitlabRepo;
+
+            // Add notifications
+            const notifications = {};
+            if (infoJson.notifications) {
+              notifications.grafana = {
+                slack: {
+                  name: 'Slack-Notification',
+                  type: 'slack',
+                  settings: {
+                    url: infoJson.notifications.slack.url
+                  }
+                }
+              };
+              delete infoJson.notifications;
+            }
+
+            infoJson.notifications = notifications;
+
+            // Add empty credentials
+            infoJson.credentials = [];
+
+            // Get Identities
+            const identities = [
+              {
+                source: 'gitlab',
+                repository: gitlabRepo,
+                repoOwner: gitlabOwner,
+                repoId: infoJson.identities.gitlab.repoId
+              }
+            ];
+
+            for (const identity of Object.keys(infoJson.identities)) {
+              if (identity !== 'gitlab') {
+                const identityObject = { source: identity };
+
+                if (identity === 'pivotal') {
+                  const pivotalUrlSplit = infoJson.identities[identity].url.split('/');
+                  identityObject.projectId = pivotalUrlSplit[pivotalUrlSplit.length - 1];
+                } else if (identity === 'heroku') {
+                  identityObject.projectId = infoJson.identities[identity].url.split('://')[1].split('.')[0];
+                }
+                identities.push(identityObject);
+              }
+            }
+            delete infoJson.identities; // Just for ordering the return object
+            infoJson.identities = identities;
+
+            // Get Members
+            const members = [];
+
+            for (const member of Object.keys(infoJson.members)) {
+              const memberObject = {
+                memberId: infoJson.members[member].name.replace(' ', '') + '_' + infoJson.members[member].surname.replace(' ', '')
+              };
+
+              // Member identities
+              const memberIdentities = [];
+              if (infoJson.members[member].gitlabUsername) {
+                memberIdentities.push({
+                  source: 'gitlab',
+                  username: infoJson.members[member].gitlabUsername
+                });
+              }
+              if (infoJson.members[member].pivotalUsername) {
+                memberIdentities.push({
+                  source: 'pivotal',
+                  username: infoJson.members[member].pivotalUsername
+                });
+              }
+              if (infoJson.members[member].herokuEmail) {
+                memberIdentities.push({
+                  source: 'heroku',
+                  email: infoJson.members[member].herokuEmail
+                });
+              }
+              memberObject.identities = memberIdentities;
+
+              // Credentials
+              memberObject.credentials = [];
+
+              members.push(memberObject);
+            }
+            delete infoJson.members; // Just for ordering the return object
+            infoJson.members = members;
+
+            // Obtain old scope
+            const oldScope = utils.getProject(courseId, infoJson.projectId);
+
+            if (JSON.stringify(oldScope) === JSON.stringify(infoJson)) {
+              projects.push({ ...project, errors: ['The is no new changes for this project scope.'], oldScope: { ...oldScope } });
+            } else {
+              oldScope && (newProjectObject.oldScope = { ...oldScope });
+              newProjectObject.newScope = { ...infoJson };
+              projects.push(newProjectObject);
+            }
+          }
+        } catch (err) {
+          logger.error(err);
+        }
+      }
+
+      // Substitution
+      for (const project of projects) {
+        if (project.newScope) {
+          if (project.oldScope) {
+            for (const courseIndex in courseScope.projects) {
+              if (courseScope.projects[courseIndex].projectId === project.newScope.projectId) {
+                courseScope.projects[courseIndex] = project.newScope;
+                break;
+              }
+            }
+          } else {
+            courseScope.projects.push(project.newScope);
+          }
+        }
+      }
+      utils.setCourseScope(courseScope, courseId);
+
+      // Return response
+      resolve(projects);
+    }).catch(err => {
+      logger.error(err);
       reject(err);
     });
   });
@@ -455,6 +701,21 @@ const getInfoYaml = (url, branch) => {
       if (branch !== 'master') {
         resolve(getInfoYaml(url, 'master'));
       } else {
+        logger.info('Not found info.yml: ' + url + branch + '/' + infoFilename);
+        resolve(undefined);
+      }
+    });
+  });
+};
+
+const getInfoYamlGitlab = (url, branch) => {
+  return new Promise((resolve, reject) => {
+    governify.httpClient.get(url + branch + '/' + infoFilename, { headers: { 'PRIVATE-TOKEN': process.env.KEY_GITLAB ? process.env.KEY_GITLAB : '' } }).then((response) => {
+      resolve(response);
+    }).catch(() => {
+      if (branch !== 'master') {
+        resolve(getInfoYaml(url, 'master'));
+      } else {
         console.log('Not found info.yml: ' + url + branch + '/' + infoFilename);
         resolve(undefined);
       }
@@ -463,4 +724,6 @@ const getInfoYaml = (url, branch) => {
 };
 
 exports.checkFromGithubList = checkFromGithubList;
+exports.checkFromGitLabList = checkFromGitLabList;
 exports.generateFromGithubList = generateFromGithubList;
+exports.generateFromGitLabList = generateFromGitLabList;

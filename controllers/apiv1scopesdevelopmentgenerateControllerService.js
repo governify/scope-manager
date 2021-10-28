@@ -1,6 +1,7 @@
 'use strict';
 
 const utils = require('./utils/utils');
+const logger = require('governify-commons').getLogger().tag('generate-scope');
 
 module.exports.generateScope = function generateScope (req, res, next) {
   if (!res.req.body || JSON.stringify(res.req.body) === '{}') {
@@ -12,7 +13,7 @@ module.exports.generateScope = function generateScope (req, res, next) {
       if (err.message === 'Course does not exist.') {
         utils.sendHelper2(res, 'Course does not exist', 403);
       } else {
-        console.log(err);
+        logger.error(err);
         utils.sendHelper2(res, 'Internal Server Error', 500);
       }
     });

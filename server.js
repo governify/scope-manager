@@ -14,10 +14,10 @@ const deploy = (env, commonsMiddleware) => {
       app.use(bodyParser.json({
         strict: false
       }));
-      app.use('/commons', commonsMiddleware);
-
       const cors = require('cors');
       app.use(cors());
+
+      app.use(commonsMiddleware);
 
       const oasTools = require('oas-tools');
       const jsyaml = require('js-yaml');
@@ -34,18 +34,22 @@ const deploy = (env, commonsMiddleware) => {
         validator: true
       };
 
+      const logger = require('governify-commons').getLogger().tag('server');
+
       oasTools.configure(optionsObject);
 
       oasTools.initialize(oasDoc, app, function () {
         http.createServer(app).listen(serverPort, function () {
           if (env !== 'test') {
-            console.log('App running at http://localhost:' + serverPort);
-            console.log('________________________________________________________________');
+            logger.info('________________________________________________________________');
+            logger.info('App running at http://localhost:' + serverPort);
+            logger.info('________________________________________________________________');
             if (optionsObject.docs !== false) {
-              console.log('API docs (Swagger UI) available on http://localhost:' + serverPort + '/docs');
-              console.log('________________________________________________________________');
+              logger.info('API docs (Swagger UI) available on http://localhost:' + serverPort + '/docs');
+              logger.info('________________________________________________________________');
             }
           }
+          resolve();
         });
       });
 
@@ -54,18 +58,6 @@ const deploy = (env, commonsMiddleware) => {
           info: 'This API was generated using oas-generator!',
           name: oasDoc.info.title
         });
-      });
-
-      // quit on ctrl-c when running docker in terminal
-      process.on('SIGINT', function onSigint () {
-        console.log('Got SIGINT (aka ctrl-c in docker). Graceful shutdown ', new Date().toISOString());
-        process.exit();
-      });
-
-      // quit properly on docker stop
-      process.on('SIGTERM', function onSigterm () {
-        console.log('Got SIGTERM (docker container stop). Graceful shutdown ', new Date().toISOString());
-        process.exit();
       });
     } catch (err) {
       reject(err);
