@@ -284,7 +284,7 @@ const getWrongAPIValues = (infoYml) => {
       const pivotalPromise = new Promise((resolve, reject) => {
         const pivotalUrlSplit = infoYml.identities.pivotal.url.split('/');
         const pivotalId = pivotalUrlSplit[pivotalUrlSplit.length - 1];
-        getStatusCode("https://www.pivotaltracker.com/services/v5/projects/"+ pivotalId ,{'X-TrackerToken': process.env.KEY_PIVOTAL ? process.env.KEY_PIVOTAL : ''}).then(statusCode => {
+        getStatusCode('https://www.pivotaltracker.com/services/v5/projects/' + pivotalId, { 'X-TrackerToken': process.env.KEY_PIVOTAL ? process.env.KEY_PIVOTAL : '' }).then(statusCode => {
           if (statusCode === undefined) {
             wrongAPIs.push('Wrong Url or private project. If problem persists, please contact Governify administrator: identities.pivotal.url');
           } else if (statusCode !== 200) {
