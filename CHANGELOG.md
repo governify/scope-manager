@@ -1,3 +1,12 @@
+## [1.5.1](https://github.com/governify/scope-manager/compare/v1.5.0...v1.5.1) (2021-11-15)
+
+
+### Bug Fixes
+
+* pivotal private repo ([3ceb1d7](https://github.com/governify/scope-manager/commit/3ceb1d7fcb895ac80005b372180c6f4093b45fab))
+
+
+
 # [1.5.0](https://github.com/governify/scope-manager/compare/v1.4.0...v1.5.0) (2021-10-28)
 
 
