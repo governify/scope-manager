@@ -202,23 +202,50 @@ const getMissingAndValidationInfo = (infoObject, gitlab) => {
       for (const key1 of Object.keys(originalInfoObject)) {
         switch (key1) {
           case 'members':
-          case 'identities':
             if (infoObject[key1] === undefined) {
               missingAttributes.push('Missing mandatory parameter: ' + key1);
             } else {
               for (const key2 of Object.keys(infoObject[key1])) {
-                for (const key3 of Object.keys(originalInfoObject[key1][key1 === 'members' ? 'member' : key2])) {
-                  const missingAndValidation = checkField(infoObject[key1][key2][key3], originalInfoObject[key1][key1 === 'members' ? 'member' : key2][key3], 'identities.' + key2 + '.' + key3);
-                  if (missingAndValidation === undefined) {
-                    missingAttributes.push('Missing mandatory parameter: identities.' + key2 + '.' + key3);
-                  } else if (missingAndValidation !== null) {
-                    wrongAttributes.push(missingAndValidation);
+                for (const key3 of Object.keys(infoObject[key1][key2])){
+                  let fieldValue = infoObject[key1][key2][key3];
+                  if (key2.endsWith('_enc')) {
+                    fieldValue = utils.decrypt(fieldValue);
+                  }
+                  if(originalInfoObject[key1]['member'][key3] !== undefined){
+                    const missingAndValidation = checkField(infoObject[key1][key2][key3], originalInfoObject[key1]['member'][key3], 'members.' + key2 + '.' + key3);
+                    if (missingAndValidation === undefined) {
+                      missingAttributes.push('Missing mandatory parameter: members.' + key2 + '.' + key3);
+                    } else if (missingAndValidation !== null) {
+                      wrongAttributes.push(missingAndValidation);
+                    }
                   }
                 }
               }
             }
             break;
-          case 'slackWebhook':
+          case 'identities':
+            if (infoObject[key1] === undefined) {
+              missingAttributes.push('Missing mandatory parameter: ' + key1);
+            } else {
+              for (const key2 of Object.keys(infoObject[key1])) {
+                let key = key2;
+                let fieldValue = infoObject[key1][key];
+                if (fieldValue === undefined) {
+                  missingAttributes.push('Missing mandatory parameter: ' + key1 + '.' + key2);
+                  continue;
+                } 
+                if (key.includes('_enc')) {
+                  key = key.replace('_enc', '');
+                  fieldValue = utils.decrypt(fieldValue);
+                }
+                const missingAndValidation = checkField(fieldValue, originalInfoObject[key1][key], 'identities.' + key );
+                if (missingAndValidation === undefined) {
+                  missingAttributes.push('Missing mandatory parameter: identities.' + key2 );
+                } else if (missingAndValidation !== null) {
+                  wrongAttributes.push(missingAndValidation);
+                }
+              }
+            }
             break;
           default:
             if (infoObject[key1] === undefined) {
@@ -282,7 +309,7 @@ const getWrongAPIValues = (infoYml) => {
     // Pivotal
     if (infoYml.identities.pivotal) {
       const pivotalPromise = new Promise((resolve, reject) => {
-        const pivotalUrlSplit = infoYml.identities.pivotal.url.split('/');
+        const pivotalUrlSplit = infoYml.identities.pivotal.split('/');
         const pivotalId = pivotalUrlSplit[pivotalUrlSplit.length - 1];
         getStatusCode('https://www.pivotaltracker.com/services/v5/projects/' + pivotalId, { 'X-TrackerToken': process.env.KEY_PIVOTAL ? process.env.KEY_PIVOTAL : '' }).then(statusCode => {
           if (statusCode === undefined) {
@@ -300,9 +327,9 @@ const getWrongAPIValues = (infoYml) => {
     }
 
     // Heroku
-    if (infoYml.identities.heroku && infoYml.identities.heroku.url) {
+    if (infoYml.identities.heroku && infoYml.identities.heroku) {
       const herokuPromise = new Promise((resolve, reject) => {
-        const originalURL = infoYml.identities.heroku.url;
+        const originalURL = infoYml.identities.heroku;
         const herokuRegex = /^https:\/\/[a-zA-Z0-9&_-]+\.herokuapp\.com/;
         if (herokuRegex.test(originalURL)) {
           const url = 'https://api.heroku.com/apps/' + originalURL.split('://')[1].split('.')[0];
@@ -409,19 +436,16 @@ const generateFromGithubList = (generationRequest) => {
 
             // Add notifications
             const notifications = {};
-            if (infoJson.notifications) {
-              notifications.grafana = {
-                slack: {
-                  name: 'Slack-Notification',
-                  type: 'slack',
-                  settings: {
-                    url: infoJson.notifications.slack.url
-                  }
-                }
-              };
-              delete infoJson.notifications;
+            for (const notification of Object.keys(infoJson.notifications)) {
+              let key = notification;
+              let value = infoJson.notifications[key]
+              if(key.endsWith('_enc')){
+                key = key.slice(0, -4);
+                value = utils.decrypt(value);
+              }
+              notifications[key] = value;
             }
-
+            delete infoJson.notifications;
             infoJson.notifications = notifications;
 
             // Add empty credentials
@@ -438,14 +462,21 @@ const generateFromGithubList = (generationRequest) => {
             ];
 
             for (const identity of Object.keys(infoJson.identities)) {
-              if (identity !== 'github') {
-                const identityObject = { source: identity };
+              let key = identity;
+              let value = infoJson.identities[key]
+              if(key.endsWith('_enc')){
+                key = key.slice(0, -4);
+                value = utils.decrypt(value);
+              }
 
-                if (identity === 'pivotal') {
-                  const pivotalUrlSplit = infoJson.identities[identity].url.split('/');
+              if (key !== 'github') {
+                const identityObject = { source: key };
+
+                if (key === 'pivotal') {
+                  const pivotalUrlSplit = value.split('/');
                   identityObject.projectId = pivotalUrlSplit[pivotalUrlSplit.length - 1];
-                } else if (identity === 'heroku') {
-                  identityObject.projectId = infoJson.identities[identity].url.split('://')[1].split('.')[0];
+                } else if (key === 'heroku') {
+                  identityObject.projectId = value.split('://')[1].split('.')[0];
                 }
                 identities.push(identityObject);
               }
