@@ -5,7 +5,7 @@ const mustache = require('mustache');
 mustache.escape = function (text) { return text; };
 const governify = require('governify-commons');
 const logger = governify.getLogger().tag('utils');
-var CryptoJS = require("crypto-js");
+const CryptoJS = require('crypto-js');
 
 const scopesGenerator = require('./scopesGenerator');
 
@@ -391,7 +391,7 @@ const sendHelper2 = (res, content, code, contentName = 'scope') => {
 };
 
 const decrypt = (message) => {
-  let result = CryptoJS.AES.decrypt(message, process.env.PRIVATE_KEY);
+  const result = CryptoJS.AES.decrypt(message, process.env.PRIVATE_KEY);
   return result.toString(CryptoJS.enc.Utf8);
 };
 

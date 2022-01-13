@@ -206,13 +206,13 @@ const getMissingAndValidationInfo = (infoObject, gitlab) => {
               missingAttributes.push('Missing mandatory parameter: ' + key1);
             } else {
               for (const key2 of Object.keys(infoObject[key1])) {
-                for (const key3 of Object.keys(infoObject[key1][key2])){
+                for (const key3 of Object.keys(infoObject[key1][key2])) {
                   let fieldValue = infoObject[key1][key2][key3];
                   if (key2.endsWith('_enc')) {
                     fieldValue = utils.decrypt(fieldValue);
                   }
-                  if(originalInfoObject[key1]['member'][key3] !== undefined){
-                    const missingAndValidation = checkField(infoObject[key1][key2][key3], originalInfoObject[key1]['member'][key3], 'members.' + key2 + '.' + key3);
+                  if (originalInfoObject[key1].member[key3] !== undefined) {
+                    const missingAndValidation = checkField(infoObject[key1][key2][key3], originalInfoObject[key1].member[key3], 'members.' + key2 + '.' + key3);
                     if (missingAndValidation === undefined) {
                       missingAttributes.push('Missing mandatory parameter: members.' + key2 + '.' + key3);
                     } else if (missingAndValidation !== null) {
@@ -233,14 +233,14 @@ const getMissingAndValidationInfo = (infoObject, gitlab) => {
                 if (fieldValue === undefined) {
                   missingAttributes.push('Missing mandatory parameter: ' + key1 + '.' + key2);
                   continue;
-                } 
+                }
                 if (key.includes('_enc')) {
                   key = key.replace('_enc', '');
                   fieldValue = utils.decrypt(fieldValue);
                 }
-                const missingAndValidation = checkField(fieldValue, originalInfoObject[key1][key], 'identities.' + key );
+                const missingAndValidation = checkField(fieldValue, originalInfoObject[key1][key], 'identities.' + key);
                 if (missingAndValidation === undefined) {
-                  missingAttributes.push('Missing mandatory parameter: identities.' + key2 );
+                  missingAttributes.push('Missing mandatory parameter: identities.' + key2);
                 } else if (missingAndValidation !== null) {
                   wrongAttributes.push(missingAndValidation);
                 }
@@ -438,8 +438,8 @@ const generateFromGithubList = (generationRequest) => {
             const notifications = {};
             for (const notification of Object.keys(infoJson.notifications)) {
               let key = notification;
-              let value = infoJson.notifications[key]
-              if(key.endsWith('_enc')){
+              let value = infoJson.notifications[key];
+              if (key.endsWith('_enc')) {
                 key = key.slice(0, -4);
                 value = utils.decrypt(value);
               }
@@ -463,8 +463,8 @@ const generateFromGithubList = (generationRequest) => {
 
             for (const identity of Object.keys(infoJson.identities)) {
               let key = identity;
-              let value = infoJson.identities[key]
-              if(key.endsWith('_enc')){
+              let value = infoJson.identities[key];
+              if (key.endsWith('_enc')) {
                 key = key.slice(0, -4);
                 value = utils.decrypt(value);
               }
