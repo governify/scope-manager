@@ -1,3 +1,12 @@
+# [1.6.0](https://github.com/governify/scope-manager/compare/v1.5.1...v1.6.0) (2022-01-26)
+
+
+### Features
+
+* Encrypted fields and notifications ([b18ad48](https://github.com/governify/scope-manager/commit/b18ad48d3d269915bc205e035fff3a2c7c4f377d))
+
+
+
 ## [1.5.1](https://github.com/governify/scope-manager/compare/v1.5.0...v1.5.1) (2021-11-15)
 
 
