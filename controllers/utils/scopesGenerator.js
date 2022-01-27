@@ -41,7 +41,7 @@ const checkFromGithubList = (checkRequest) => {
         }
 
         await getInfoYaml(githubRawUrl + githubOwner + '/' + githubRepo + '/', 'main').then((getInfoYamlResponse) => {
-          checkInfoYaml(getInfoYamlResponse.data, missingAndValidation, wrongAPIs, infoYmlJson, promises, repoURL)
+          checkInfoYaml(getInfoYamlResponse.data, missingAndValidation, wrongAPIs, infoYmlJson, promises, repoURL);
         });
       }
 
@@ -232,7 +232,7 @@ const checkInfoYaml = (InfoYaml, missingAndValidation, wrongAPIs, infoYmlJson, p
       wrongAPIs[repoURL] = { invalidApiValues: [] };
     }
   }
-}
+};
 
 // Missing and validation
 const getMissingAndValidationInfo = (infoObject, gitlab) => {
@@ -252,13 +252,13 @@ const getMissingAndValidationInfo = (infoObject, gitlab) => {
                 missingAttributes.push('There must be at least one member');
               } else {
                 for (const key2 of Object.keys(infoObject[key1])) {
-                  for (const key3 of Object.keys(originalInfoObject[key1]['member'])) {
+                  for (const key3 of Object.keys(originalInfoObject[key1].member)) {
                     let encripted = false;
-                    if (infoObject[key1][key2].hasOwnProperty(key3+'_enc')) {
-                      infoObject[key1][key2][key3] = infoObject[key1][key2][key3+'_enc']
+                    if (infoObject[key1][key2][key3 + '_enc'] !== undefined) {
+                      infoObject[key1][key2][key3] = infoObject[key1][key2][key3 + '_enc'];
                       encripted = true;
                     }
-                    let fieldValue = infoObject[key1][key2][key3]
+                    let fieldValue = infoObject[key1][key2][key3];
                     if (encripted) {
                       fieldValue = utils.decrypt(fieldValue);
                     }
@@ -281,9 +281,9 @@ const getMissingAndValidationInfo = (infoObject, gitlab) => {
             } else {
               for (const key2 of Object.keys(originalInfoObject[key1])) {
                 let encripted = false;
-                
-                if (infoObject[key1].hasOwnProperty(key2+'_enc')) {
-                  infoObject[key1][key2] = infoObject[key1][key2+'_enc']
+
+                if (infoObject[key1][key2 + '_enc'] !== undefined) {
+                  infoObject[key1][key2] = infoObject[key1][key2 + '_enc'];
                   encripted = true;
                 }
                 let fieldValue = infoObject[key1][key2];
