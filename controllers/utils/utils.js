@@ -334,11 +334,12 @@ const isAuthorized = (token) => {
 
 // Scope generator
 
-const checkInfoYml = (projectList) => {
-  if (!projectList.repoList.some((val) => val.includes('gitlab.com'))) {
-    return scopesGenerator.checkFromGithubList(projectList);
+const checkInfoYml = (infoYml) => {
+  if(infoYml.name === "Wizard") return scopesGenerator.checkFromJson(infoYml);
+  if (!infoYml.repoList.some((val) => val.includes('gitlab.com'))) {
+    return scopesGenerator.checkFromGithubList(infoYml);
   } else {
-    return scopesGenerator.checkFromGitLabList(projectList);
+    return scopesGenerator.checkFromGitLabList(infoYml);
   }
 };
 
