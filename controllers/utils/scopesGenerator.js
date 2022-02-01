@@ -258,9 +258,8 @@ const getMissingAndValidationInfo = (infoObject, gitlab) => {
                       infoObject[key1][key2][key3] = infoObject[key1][key2][key3 + '_enc'];
                       encripted = true;
                     }
-                    let fieldValue = infoObject[key1][key2][key3];
                     if (encripted) {
-                      fieldValue = utils.decrypt(fieldValue);
+                      infoObject[key1][key2][key3] = utils.decrypt(infoObject[key1][key2][key3]);
                     }
                     if (originalInfoObject[key1].member[key3] !== undefined) {
                       const missingAndValidation = checkField(infoObject[key1][key2][key3], originalInfoObject[key1].member[key3], 'members.' + key2 + '.' + key3);
@@ -286,11 +285,10 @@ const getMissingAndValidationInfo = (infoObject, gitlab) => {
                   infoObject[key1][key2] = infoObject[key1][key2 + '_enc'];
                   encripted = true;
                 }
-                let fieldValue = infoObject[key1][key2];
                 if (encripted) {
-                  fieldValue = utils.decrypt(fieldValue);
+                  infoObject[key1][key2] = utils.decrypt(infoObject[key1][key2]);
                 }
-                const missingAndValidation = checkField(fieldValue, originalInfoObject[key1][key2], 'identities.' + key2);
+                const missingAndValidation = checkField(infoObject[key1][key2], originalInfoObject[key1][key2], 'identities.' + key2);
                 if (missingAndValidation === undefined) {
                   missingAttributes.push('Missing mandatory parameter: identities.' + key2);
                 } else if (missingAndValidation !== null) {
