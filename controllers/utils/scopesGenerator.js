@@ -486,14 +486,16 @@ const generateFromGithubList = (generationRequest) => {
 
             // Add notifications
             const notifications = {};
-            for (const notification of Object.keys(infoJson.notifications)) {
-              let key = notification;
-              let value = infoJson.notifications[key];
-              if (key.endsWith('_enc')) {
-                key = key.slice(0, -4);
-                value = utils.decrypt(value);
+            if(infoJson.notifications){
+              for (const notification of Object.keys(infoJson.notifications)) {
+                let key = notification;
+                let value = infoJson.notifications[key];
+                if (key.endsWith('_enc')) {
+                  key = key.slice(0, -4);
+                  value = utils.decrypt(value);
+                }
+                notifications[key] = value;
               }
-              notifications[key] = value;
             }
             delete infoJson.notifications;
             infoJson.notifications = notifications;
