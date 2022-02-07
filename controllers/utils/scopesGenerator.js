@@ -486,7 +486,7 @@ const generateFromGithubList = (generationRequest) => {
 
             // Add notifications
             const notifications = {};
-            if(infoJson.notifications){
+            if (infoJson.notifications) {
               for (const notification of Object.keys(infoJson.notifications)) {
                 let key = notification;
                 let value = infoJson.notifications[key];
