@@ -41,42 +41,7 @@ const checkFromGithubList = (checkRequest) => {
         }
 
         await getInfoYaml(githubRawUrl + githubOwner + '/' + githubRepo + '/', 'main').then((getInfoYamlResponse) => {
-          if (getInfoYamlResponse === undefined) {
-            missingAndValidation[repoURL] = { missingValues: ['Github Repo URL not valid or Info.yml file not found!'], wrongFormatValues: [] };
-            wrongAPIs[repoURL] = { invalidApiValues: [] };
-          } else {
-            try {
-              const infoJson = jsyaml.load(getInfoYamlResponse.data).project;
-              infoYmlJson[repoURL] = infoJson;
-
-              // Missing and format
-              const missingAndValidationPromise = new Promise((resolve, reject) => {
-                getMissingAndValidationInfo(infoJson).then((projectValidation) => {
-                  missingAndValidation[repoURL] = { ...projectValidation };
-                  resolve();
-                }).catch(err => {
-                  logger.error(err);
-                  resolve();
-                });
-              });
-              promises.push(missingAndValidationPromise);
-
-              // Invalid API values
-              const invalidAPIValuesPromise = new Promise((resolve, reject) => {
-                getWrongAPIValues(infoJson).then((projectValidation) => {
-                  wrongAPIs[repoURL] = { ...projectValidation };
-                  resolve();
-                }).catch(err => {
-                  logger.error(err);
-                  resolve();
-                });
-              });
-              promises.push(invalidAPIValuesPromise);
-            } catch (err) {
-              missingAndValidation[repoURL] = { missingValues: [], wrongFormatValues: ['Not valid info.yml format. Check yaml syntax!'] };
-              wrongAPIs[repoURL] = { invalidApiValues: [] };
-            }
-          }
+          checkInfoYaml(getInfoYamlResponse.data, missingAndValidation, wrongAPIs, infoYmlJson, promises, repoURL);
         });
       }
 
@@ -191,12 +156,90 @@ const checkFromGitLabList = (checkRequest) => {
   });
 };
 
+const checkFromJson = (checkRequest) => {
+  /*eslint-disable */
+  return new Promise(async (resolve, reject) => {
+    /* eslint-enable */
+    try {
+      const missingAndValidation = {};
+      const wrongAPIs = {};
+      const infoYmlJson = {};
+      const promises = [];
+
+      checkInfoYaml(checkRequest.data, missingAndValidation, wrongAPIs, infoYmlJson, promises, 'Wizard');
+
+      Promise.all(promises).then(() => {
+        const finalResponse = [];
+        for (const project of Object.keys(missingAndValidation)) {
+          const errorProject = {};
+          errorProject.projectURL = project;
+
+          // Errors splitted by category
+          // errorProject.errors = { ...missingAndValidation[project] };
+          // errorProject.errors.invalidApiValues = wrongAPIs[project].invalidApiValues;
+
+          // Merged errors
+          errorProject.errors = [...missingAndValidation[project].missingValues, ...missingAndValidation[project].wrongFormatValues];
+          errorProject.errors = [...errorProject.errors, ...wrongAPIs[project].invalidApiValues];
+          errorProject.infoYml = infoYmlJson[project];
+          finalResponse.push(errorProject);
+        }
+        resolve(finalResponse);
+      }).catch(err => {
+        logger.error(err);
+        reject(err);
+      });
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
+const checkInfoYaml = (InfoYaml, missingAndValidation, wrongAPIs, infoYmlJson, promises, repoURL) => {
+  if (InfoYaml === undefined) {
+    missingAndValidation[repoURL] = { missingValues: ['Github Repo URL not valid or Info.yml file not found!'], wrongFormatValues: [] };
+    wrongAPIs[repoURL] = { invalidApiValues: [] };
+  } else {
+    try {
+      const infoJson = jsyaml.load(InfoYaml).project;
+      infoYmlJson[repoURL] = infoJson;
+
+      // Missing and format
+      const missingAndValidationPromise = new Promise((resolve, reject) => {
+        getMissingAndValidationInfo(infoJson, true).then((projectValidation) => {
+          missingAndValidation[repoURL] = { ...projectValidation };
+          resolve();
+        }).catch(err => {
+          console.log(err);
+          resolve();
+        });
+      });
+      promises.push(missingAndValidationPromise);
+
+      // Invalid API values
+      const invalidAPIValuesPromise = new Promise((resolve, reject) => {
+        getWrongAPIValues(infoJson).then((projectValidation) => {
+          wrongAPIs[repoURL] = { ...projectValidation };
+          resolve();
+        }).catch(err => {
+          console.log(err);
+          resolve();
+        });
+      });
+      promises.push(invalidAPIValuesPromise);
+    } catch (err) {
+      missingAndValidation[repoURL] = { missingValues: [], wrongFormatValues: ['Not valid info.yml format. Check yaml syntax!'] };
+      wrongAPIs[repoURL] = { invalidApiValues: [] };
+    }
+  }
+};
+
 // Missing and validation
 const getMissingAndValidationInfo = (infoObject, gitlab) => {
   return new Promise((resolve, reject) => {
     const missingAttributes = [];
     const wrongAttributes = [];
-    const url = gitlab ? 'https://gitlab.com/governify_auditor/goldenflow-showcase-project/-/raw/main/info-gitlab-template.yml' : 'https://raw.githubusercontent.com/governify/audited-project-template/main/info.yml';
+    const url = 'https://raw.githubusercontent.com/governify/audited-project-template/main/info.yml';
     governify.httpClient.get(url).then((response) => {
       const originalInfoObject = jsyaml.load(response.data).project;
       for (const key1 of Object.keys(originalInfoObject)) {
@@ -205,18 +248,26 @@ const getMissingAndValidationInfo = (infoObject, gitlab) => {
             if (infoObject[key1] === undefined) {
               missingAttributes.push('Missing mandatory parameter: ' + key1);
             } else {
-              for (const key2 of Object.keys(infoObject[key1])) {
-                for (const key3 of Object.keys(infoObject[key1][key2])) {
-                  let fieldValue = infoObject[key1][key2][key3];
-                  if (key2.endsWith('_enc')) {
-                    fieldValue = utils.decrypt(fieldValue);
-                  }
-                  if (originalInfoObject[key1].member[key3] !== undefined) {
-                    const missingAndValidation = checkField(infoObject[key1][key2][key3], originalInfoObject[key1].member[key3], 'members.' + key2 + '.' + key3);
-                    if (missingAndValidation === undefined) {
-                      missingAttributes.push('Missing mandatory parameter: members.' + key2 + '.' + key3);
-                    } else if (missingAndValidation !== null) {
-                      wrongAttributes.push(missingAndValidation);
+              if (Object.keys(infoObject[key1]).length === 0) {
+                missingAttributes.push('There must be at least one member');
+              } else {
+                for (const key2 of Object.keys(infoObject[key1])) {
+                  for (const key3 of Object.keys(originalInfoObject[key1].member)) {
+                    let encripted = false;
+                    if (infoObject[key1][key2][key3 + '_enc'] !== undefined) {
+                      infoObject[key1][key2][key3] = infoObject[key1][key2][key3 + '_enc'];
+                      encripted = true;
+                    }
+                    if (encripted) {
+                      infoObject[key1][key2][key3] = utils.decrypt(infoObject[key1][key2][key3]);
+                    }
+                    if (originalInfoObject[key1].member[key3] !== undefined) {
+                      const missingAndValidation = checkField(infoObject[key1][key2][key3], originalInfoObject[key1].member[key3], 'members.' + key2 + '.' + key3);
+                      if (missingAndValidation === undefined) {
+                        missingAttributes.push('Missing mandatory parameter: members.' + key2 + '.' + key3);
+                      } else if (missingAndValidation !== null) {
+                        wrongAttributes.push(missingAndValidation);
+                      }
                     }
                   }
                 }
@@ -227,18 +278,17 @@ const getMissingAndValidationInfo = (infoObject, gitlab) => {
             if (infoObject[key1] === undefined) {
               missingAttributes.push('Missing mandatory parameter: ' + key1);
             } else {
-              for (const key2 of Object.keys(infoObject[key1])) {
-                let key = key2;
-                let fieldValue = infoObject[key1][key];
-                if (fieldValue === undefined) {
-                  missingAttributes.push('Missing mandatory parameter: ' + key1 + '.' + key2);
-                  continue;
+              for (const key2 of Object.keys(originalInfoObject[key1])) {
+                let encripted = false;
+
+                if (infoObject[key1][key2 + '_enc'] !== undefined) {
+                  infoObject[key1][key2] = infoObject[key1][key2 + '_enc'];
+                  encripted = true;
                 }
-                if (key.includes('_enc')) {
-                  key = key.replace('_enc', '');
-                  fieldValue = utils.decrypt(fieldValue);
+                if (encripted) {
+                  infoObject[key1][key2] = utils.decrypt(infoObject[key1][key2]);
                 }
-                const missingAndValidation = checkField(fieldValue, originalInfoObject[key1][key], 'identities.' + key);
+                const missingAndValidation = checkField(infoObject[key1][key2], originalInfoObject[key1][key2], 'identities.' + key2);
                 if (missingAndValidation === undefined) {
                   missingAttributes.push('Missing mandatory parameter: identities.' + key2);
                 } else if (missingAndValidation !== null) {
@@ -436,14 +486,16 @@ const generateFromGithubList = (generationRequest) => {
 
             // Add notifications
             const notifications = {};
-            for (const notification of Object.keys(infoJson.notifications)) {
-              let key = notification;
-              let value = infoJson.notifications[key];
-              if (key.endsWith('_enc')) {
-                key = key.slice(0, -4);
-                value = utils.decrypt(value);
+            if (infoJson.notifications) {
+              for (const notification of Object.keys(infoJson.notifications)) {
+                let key = notification;
+                let value = infoJson.notifications[key];
+                if (key.endsWith('_enc')) {
+                  key = key.slice(0, -4);
+                  value = utils.decrypt(value);
+                }
+                notifications[key] = value;
               }
-              notifications[key] = value;
             }
             delete infoJson.notifications;
             infoJson.notifications = notifications;
@@ -758,5 +810,6 @@ const getInfoYamlGitlab = (url, branch) => {
 
 exports.checkFromGithubList = checkFromGithubList;
 exports.checkFromGitLabList = checkFromGitLabList;
+exports.checkFromJson = checkFromJson;
 exports.generateFromGithubList = generateFromGithubList;
 exports.generateFromGitLabList = generateFromGitLabList;
