@@ -1,3 +1,18 @@
+# [1.7.0](https://github.com/governify/scope-manager/compare/v1.6.0...v1.7.0) (2022-02-07)
+
+
+### Bug Fixes
+
+* Checher desencrypt workflow ([0624c12](https://github.com/governify/scope-manager/commit/0624c1210f398ad242c50d0959c1a8f269caedfd))
+* No notification in info yml ([8b16494](https://github.com/governify/scope-manager/commit/8b1649482291e81bc4a5059591b38473f3d16bae))
+
+
+### Features
+
+* Check from json ([00eb11d](https://github.com/governify/scope-manager/commit/00eb11d377b17a9b43172ca4f6c8bb45f7b7bb71))
+
+
+
 # [1.6.0](https://github.com/governify/scope-manager/compare/v1.5.1...v1.6.0) (2022-01-26)
 
 
