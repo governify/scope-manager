@@ -1,3 +1,12 @@
+## [1.7.1](https://github.com/governify/scope-manager/compare/v1.7.0...v1.7.1) (2022-02-23)
+
+
+### Bug Fixes
+
+* Url attribute ([c351a7e](https://github.com/governify/scope-manager/commit/c351a7e849fd02c4a45c039d703c26d6249060cc))
+
+
+
 # [1.7.0](https://github.com/governify/scope-manager/compare/v1.6.0...v1.7.0) (2022-02-07)
 
 
