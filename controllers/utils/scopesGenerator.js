@@ -286,8 +286,8 @@ const getMissingAndValidationInfo = (infoObject, gitlab) => {
                   encripted = true;
                 }
 
-                if (infoObject[key1][key2] && infoObject[key1][key2]['url'] !== undefined) {
-                  infoObject[key1][key2] = infoObject[key1][key2]['url'];
+                if (infoObject[key1][key2] && infoObject[key1][key2].url !== undefined) {
+                  infoObject[key1][key2] = infoObject[key1][key2].url;
                 }
 
                 if (encripted) {
@@ -364,7 +364,7 @@ const getWrongAPIValues = (infoYml) => {
     // Pivotal
     if (infoYml.identities.pivotal) {
       const pivotalPromise = new Promise((resolve, reject) => {
-        if (infoYml.identities.pivotal['url'] !== undefined) infoYml.identities.pivotal = infoYml.identities.pivotal['url'];
+        if (infoYml.identities.pivotal.url !== undefined) infoYml.identities.pivotal = infoYml.identities.pivotal.url;
         const pivotalUrlSplit = infoYml.identities.pivotal.split('/');
         const pivotalId = pivotalUrlSplit[pivotalUrlSplit.length - 1];
         getStatusCode('https://www.pivotaltracker.com/services/v5/projects/' + pivotalId, { 'X-TrackerToken': process.env.KEY_PIVOTAL ? process.env.KEY_PIVOTAL : '' }).then(statusCode => {
@@ -384,7 +384,7 @@ const getWrongAPIValues = (infoYml) => {
 
     // Heroku
     if (infoYml.identities.heroku) {
-      if (infoYml.identities.heroku['url'] !== undefined) infoYml.identities.heroku = infoYml.identities.heroku['url'];
+      if (infoYml.identities.heroku.url !== undefined) infoYml.identities.heroku = infoYml.identities.heroku.url;
       const herokuPromise = new Promise((resolve, reject) => {
         const originalURL = infoYml.identities.heroku;
         const herokuRegex = /^https:\/\/[a-zA-Z0-9&_-]+\.herokuapp\.com/;
@@ -522,7 +522,7 @@ const generateFromGithubList = (generationRequest) => {
 
             for (const identity of Object.keys(infoJson.identities)) {
               let key = identity;
-              if (infoJson.identities[key]['url'] !== undefined) infoJson.identities[key] = infoJson.identities[key]['url'];
+              if (infoJson.identities[key] && infoJson.identities[key].url !== undefined) infoJson.identities[key] = infoJson.identities[key].url;
               let value = infoJson.identities[key];
               if (key.endsWith('_enc')) {
                 key = key.slice(0, -4);
