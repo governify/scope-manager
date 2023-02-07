@@ -279,6 +279,8 @@ const getMissingAndValidationInfo = (infoObject, gitlab) => {
               missingAttributes.push('Missing mandatory parameter: ' + key1);
             } else {
               for (const key2 of Object.keys(originalInfoObject[key1])) {
+                if (infoObject[key1][key2] === undefined) continue;
+
                 let encripted = false;
 
                 if (infoObject[key1][key2 + '_enc'] !== undefined) {
@@ -303,7 +305,7 @@ const getMissingAndValidationInfo = (infoObject, gitlab) => {
             }
             break;
           default:
-            if (infoObject[key1] === undefined) {
+            if (infoObject[key1] === undefined || infoObject[key1] === '') {
               missingAttributes.push('Missing mandatory parameter: ' + key1);
             }
         }
