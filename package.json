@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "mocha ./tests/test.js --timeout 20000 -s 20",
+    "test": "mocha ./tests/test.js --timeout 20000 -s 20 --bail",
     "coverage": "nyc --reporter=lcov mocha ./tests/test.js --timeout 20000 -s 20",
     "cov": "nyc mocha ./tests/test.js --timeout 20000 -s 20",
     "lint": "semistandard",

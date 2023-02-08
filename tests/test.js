@@ -21,7 +21,7 @@ describe('Tests', function () {
       server.deploy('test', commonsMiddleware).then( () => {
         governify.httpClient.setRequestLogging(false);
         nockController.instantiateMockups('test').then(() => {
-          sinon.stub(console);
+          sinon.stub(console, 'log');
           done();
         }) 
       }).catch(err2 => {
