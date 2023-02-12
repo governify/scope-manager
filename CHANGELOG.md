@@ -1,3 +1,12 @@
+# [1.8.0](https://github.com/governify/scope-manager/compare/v1.7.2...v1.8.0) (2023-02-12)
+
+
+### Features
+
+* Installed newrelic ([c9b3803](https://github.com/governify/scope-manager/commit/c9b380373973c448fa22f42ab1be20db37ef8008))
+
+
+
 ## [1.7.2](https://github.com/governify/scope-manager/compare/v1.7.1...v1.7.2) (2023-02-08)
 
 
