@@ -1,3 +1,12 @@
+## [1.7.2](https://github.com/governify/scope-manager/compare/v1.7.1...v1.7.2) (2023-02-08)
+
+
+### Bug Fixes
+
+* Fixed identities validation ([af9386c](https://github.com/governify/scope-manager/commit/af9386cec60af46f886fc5306fd4e65e1c9d2c5b))
+
+
+
 ## [1.7.1](https://github.com/governify/scope-manager/compare/v1.7.0...v1.7.1) (2022-02-23)
 
 
