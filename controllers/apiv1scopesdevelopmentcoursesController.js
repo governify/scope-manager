@@ -5,3 +5,8 @@ const varapiv1scopesdevelopmentcoursesController = require('./apiv1scopesdevelop
 module.exports.getCourses = function getCourses (req, res, next) {
   varapiv1scopesdevelopmentcoursesController.getCourses(req.swagger.params, res, next);
 };
+
+module.exports.createClass = function createClass (req, res, next) {
+  varapiv1scopesdevelopmentcoursesController.createClass(req.body, res, next);
+};
+
