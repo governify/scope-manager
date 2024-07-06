@@ -2,7 +2,9 @@
 
 const fs = require('fs');
 const mustache = require('mustache');
-mustache.escape = function (text) { return text; };
+mustache.escape = function (text) {
+  return text;
+};
 const governify = require('governify-commons');
 const logger = governify.getLogger().tag('utils');
 const CryptoJS = require('crypto-js');
@@ -15,8 +17,12 @@ let authorizedTokens;
 // Scope management
 const init = () => {
   fs.readFile('./configurations/authKeys.json', 'utf-8', (err, data) => {
-    if (err) { logger.error(err); } else {
-      authorizedTokens = JSON.parse(mustache.render(data, process.env, {}, ['$_[', ']']));
+    if (err) {
+      logger.error(err);
+    } else {
+      authorizedTokens = JSON.parse(
+        mustache.render(data, process.env, {}, ['$_[', ']'])
+      );
       logger.info('Successfully loaded authorized keys.');
     }
   });
@@ -26,7 +32,9 @@ const init = () => {
   } else {
     logger.warn('Working without Assets Manager (Missing key).');
     fs.readFile('./configurations/scopes.json', (err, data) => {
-      if (err) { logger.error(err); } else {
+      if (err) {
+        logger.error(err);
+      } else {
         logger.info('Successfully loaded scopes from configurations file.');
         scopeObject = JSON.parse(data);
       }
@@ -37,46 +45,63 @@ const init = () => {
 const fetchScopes = () => {
   return new Promise((resolve, reject) => {
     logger.info('Trying to fetch scopes.json file from assets.');
-    governify.infrastructure.getService('internal.assets').get('/api/v1/private/scope-manager/scopes.json', {
-      params: {
-        private_key: process.env.KEY_ASSETS_MANAGER_PRIVATE
-      }
-    }).then((response) => {
-      if (response.data === 'File not found.') {
-        logger.error('Error: scopes.json file not found in Assets Manager. Retrying in 10s.');
+    governify.infrastructure
+      .getService('internal.assets')
+      .get('/api/v1/private/scope-manager/scopes.json', {
+        params: {
+          private_key: process.env.KEY_ASSETS_MANAGER_PRIVATE
+        }
+      })
+      .then((response) => {
+        if (response.data === 'File not found.') {
+          logger.error(
+            'Error: scopes.json file not found in Assets Manager. Retrying in 10s.'
+          );
+          setTimeout(() => {
+            fetchScopes();
+          }, 10000);
+        } else {
+          logger.info('Successfully retrieved scopes from Assets Manager.');
+          scopeObject = response.data;
+        }
+      })
+      .catch((err) => {
+        logger.error(
+          'Error when retrieving scopes from Assets Manager. Retrying in 5s.',
+          err.message
+        );
         setTimeout(() => {
           fetchScopes();
-        }, 10000);
-      } else {
-        logger.info('Successfully retrieved scopes from Assets Manager.');
-        scopeObject = response.data;
-      }
-    }).catch((err) => {
-      logger.error('Error when retrieving scopes from Assets Manager. Retrying in 5s.', err.message);
-      setTimeout(() => {
-        fetchScopes();
-      }, 5000);
-    });
+        }, 5000);
+      });
   });
 };
 
-const putScopes = () => {
+const putScopes = (attempt = 1) => {
   return new Promise((resolve, reject) => {
-    logger.info('Trying to PUT scopes.json file to assets.');
-    governify.infrastructure.getService('internal.assets').put('/api/v1/private/scope-manager/scopes.json', scopeObject, {
-      params: {
-        private_key: process.env.KEY_ASSETS_MANAGER_PRIVATE
-      }
-    }).then((response) => {
-      logger.info('Successfully saved scopes to Assets Manager.');
-      logger.info(response);
-      resolve();
-    }).catch((err) => {
-      logger.error('Error when saving scopes to Assets Manager. Retrying in 10s.', err.message);
-      setTimeout(() => {
-        putScopes();
-      }, 10000);
-    });
+    logger.info(`Attempt ${attempt}: Trying to PUT scopes.json file to assets.`);
+    governify.infrastructure
+      .getService('internal.assets')
+      .put('/api/v1/private/scope-manager/scopes.json', JSON.stringify(scopeObject, null, 2), {
+        params: {
+          private_key: process.env.KEY_ASSETS_MANAGER_PRIVATE
+        }
+      })
+      .then((response) => {
+        logger.info('Successfully saved scopes to Assets Manager.');
+        resolve();
+      })
+      .catch((err) => {
+        if (attempt < 5) {
+          logger.error(`Attempt ${attempt}: Error when saving scopes to Assets Manager. Retrying in 10s.`, err.message);
+          setTimeout(() => {
+            putScopes(attempt + 1);
+          }, 10000);
+        } else {
+          logger.error(`Attempt ${attempt}: Failed to save scopes after 5 attempts.`, err.message);
+          reject(err);
+        }
+      });
   });
 };
 
@@ -98,10 +123,15 @@ const setCourseScope = (courseScope, courseId) => {
   }
 
   if (process.env.KEY_ASSETS_MANAGER_PRIVATE) {
-    putScopes();
+    // putScopes();
   } else {
-    logger.warn('Working without Assets Manager (Missing URL/key). Saving Scopes locally.');
-    fs.writeFileSync('./configurations/scopes.json', JSON.stringify(scopeObject));
+    logger.warn(
+      'Working without Assets Manager (Missing URL/key). Saving Scopes locally.'
+    );
+    fs.writeFileSync(
+      './configurations/scopes.json',
+      JSON.stringify(scopeObject)
+    );
     logger.info('Successfully saved scopes to configurations file.');
   }
 };
@@ -116,10 +146,56 @@ const getCourses = () => {
   }
 };
 
+const createClass = (newClass) => {
+  try {
+    if (!newClass.classId) {
+      return 400;
+    } else {
+      if (scopeObject.development.some((course) => course.classId === newClass.classId)) {
+        return 409;
+      } else {
+        scopeObject.development.push(newClass);
+        logger.info('Adding new course and updating scopes.');
+        putScopes();
+        return 201;
+      }
+    }
+  } catch (err) {
+    logger.error('Internal error', JSON.stringify(err));
+    return 'error';
+  }
+};
+
+const putCourse = (courseId, courseUpdated) => {
+  try {
+    const courseIndex = scopeObject.development.findIndex((course) => courseId === course.classId);
+    if (courseIndex === -1) {
+      return 404;
+    } else {
+      const course = scopeObject.development[courseIndex];
+
+      course.templateId = courseUpdated.templateId ?? course.templateId;
+      course.autoRun = courseUpdated.autoRun ?? course.autoRun;
+      course.hidden = courseUpdated.hidden ?? course.hidden;
+      course.joinCode = courseUpdated.joinCode ?? course.joinCode;
+      scopeObject.development[courseIndex] = course;
+
+      logger.info('Updating course and scopes.');
+      putScopes();
+      return 200;
+    }
+  } catch (err) {
+    logger.error('Internal error', JSON.stringify(err));
+    return 'error';
+  }
+};
+
 const getCourse = (courseId) => {
   try {
     for (const course of scopeObject.development) {
-      if (course.classId === courseId) { return course; }
+      if (course.classId === courseId) {
+        return course;
+      }
     }
     return undefined;
   } catch (err) {
@@ -131,7 +207,11 @@ const getCourse = (courseId) => {
 const getProjects = (courseId) => {
   try {
     const course = getCourse(courseId);
-    if (course) { return course.projects; } else { return undefined; }
+    if (course) {
+      return course.projects;
+    } else {
+      return undefined;
+    }
   } catch (err) {
     logger.error('Internal error', err);
     return 'error';
@@ -143,7 +223,9 @@ const getProject = (courseId, projectId) => {
     const projects = getProjects(courseId);
     if (projects) {
       for (const project of projects) {
-        if (project.projectId === projectId) { return project; }
+        if (project.projectId === projectId) {
+          return project;
+        }
       }
     }
     return undefined;
@@ -156,7 +238,11 @@ const getProject = (courseId, projectId) => {
 const getMembers = (courseId, projectId) => {
   try {
     const project = getProject(courseId, projectId);
-    if (project) { return project.members; } else { return undefined; }
+    if (project) {
+      return project.members;
+    } else {
+      return undefined;
+    }
   } catch (err) {
     logger.error('Internal error', err);
     return 'error';
@@ -168,7 +254,9 @@ const getMember = (courseId, projectId, memberId) => {
     const members = getMembers(courseId, projectId);
     if (members) {
       for (const member of members) {
-        if (member.memberId === memberId) { return member; }
+        if (member.memberId === memberId) {
+          return member;
+        }
       }
     }
     return undefined;
@@ -186,7 +274,11 @@ const searchScope = (scope) => {
           if (scope.project.default) {
             if (scope.member) {
               if (scope.member.default) {
-                return getMember(scope.class.default, scope.project.default, scope.member.default);
+                return getMember(
+                  scope.class.default,
+                  scope.project.default,
+                  scope.member.default
+                );
               } else {
                 return getMembers(scope.class.default, scope.project.default);
               }
@@ -224,7 +316,9 @@ const getCoursesUnauth = () => {
 const getCourseUnauth = (courseId) => {
   try {
     for (const course of getCoursesUnauth()) {
-      if (course.classId === courseId) { return course; }
+      if (course.classId === courseId) {
+        return course;
+      }
     }
     return undefined;
   } catch (err) {
@@ -236,7 +330,11 @@ const getCourseUnauth = (courseId) => {
 const getProjectsUnauth = (courseId) => {
   try {
     const course = getCourseUnauth(courseId);
-    if (course) { return course.projects; } else { return undefined; }
+    if (course) {
+      return course.projects;
+    } else {
+      return undefined;
+    }
   } catch (err) {
     logger.error('Internal error', err);
     return 'error';
@@ -248,7 +346,9 @@ const getProjectUnauth = (courseId, projectId) => {
     const projects = getProjectsUnauth(courseId);
     if (projects) {
       for (const project of projects) {
-        if (project.projectId === projectId) { return project; }
+        if (project.projectId === projectId) {
+          return project;
+        }
       }
     }
     return undefined;
@@ -261,7 +361,11 @@ const getProjectUnauth = (courseId, projectId) => {
 const getMembersUnauth = (courseId, projectId) => {
   try {
     const project = getProjectUnauth(courseId, projectId);
-    if (project) { return project.members; } else { return undefined; }
+    if (project) {
+      return project.members;
+    } else {
+      return undefined;
+    }
   } catch (err) {
     logger.error('Internal error', err);
     return 'error';
@@ -273,7 +377,9 @@ const getMemberUnauth = (courseId, projectId, memberId) => {
     const members = getMembersUnauth(courseId, projectId);
     if (members) {
       for (const member of members) {
-        if (member.memberId === memberId) { return member; }
+        if (member.memberId === memberId) {
+          return member;
+        }
       }
     }
     return undefined;
@@ -402,6 +508,8 @@ exports.setCourseScope = setCourseScope;
 
 exports.getCourses = getCourses;
 exports.getCourse = getCourse;
+exports.createClass = createClass;
+exports.putCourse = putCourse;
 exports.getProjects = getProjects;
 exports.getProject = getProject;
 exports.getMembers = getMembers;

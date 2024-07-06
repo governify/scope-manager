@@ -4,29 +4,50 @@ info:
   title: Governify Scope Manager
   description: >-
     This is an OpenAPI Specification created by oas-wizard
-    (https://github.com/pafmon/oas-wizard)  
+    (https://github.com/pafmon/oas-wizard)
   contact:
     name: PabloFM
     email: pablofm@us.es
-    url: 'http://www.isa.us.es'
+    url: "http://www.isa.us.es"
   license:
     name: MIT
-    url: 'http://opensource.org/licenses/MIT'
+    url: "http://opensource.org/licenses/MIT"
 paths:
-  '/api/v1/scopes/development/courses':
+  "/api/v1/scopes/development/courses":
     get:
       description: Asks for all the courses
       operationId: getCourses
       responses:
-        '200':
+        "200":
           description: Courses scopes found
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/errorModel'
-  '/api/v1/scopes/development/{courseId}':
+                $ref: "#/components/schemas/errorModel"
+    post:
+      description: Creates a new course
+      operationId: createClass
+      requestBody:  
+        x-name: course_object
+        description: Course object
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "201":
+          description: Course created
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorModel"
+
+  "/api/v1/scopes/development/{courseId}":
     get:
       description: Asks for all the scopes for a courseId
       operationId: getCourse
@@ -38,15 +59,44 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Course scope found
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/errorModel'
-  '/api/v1/scopes/development/{courseId}/projects':
+                $ref: "#/components/schemas/errorModel"
+    put:
+      description: Updates a course
+      operationId: putCourse
+      parameters:
+        - name: courseId
+          in: path
+          description: courseId of a development scope
+          required: true
+          schema:
+            type: string
+      requestBody:  
+        x-name: course_body
+        description: Course object
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Course updated
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorModel"
+
+
+  "/api/v1/scopes/development/{courseId}/projects":
     get:
       description: Asks for all the projects scope from a given a courseId
       operationId: getProjects
@@ -58,15 +108,15 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Project scopes found
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/errorModel'
-  '/api/v1/scopes/development/{courseId}/{projectId}':
+                $ref: "#/components/schemas/errorModel"
+  "/api/v1/scopes/development/{courseId}/{projectId}":
     get:
       description: Asks for a project scope from a given courseId and projectId
       operationId: getProject
@@ -84,15 +134,15 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Project scope found
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/errorModel'
-  '/api/v1/scopes/development/{courseId}/{projectId}/members':
+                $ref: "#/components/schemas/errorModel"
+  "/api/v1/scopes/development/{courseId}/{projectId}/members":
     get:
       description: Asks for all the member scopes from a given courseId and projectId
       operationId: getMembers
@@ -110,17 +160,17 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Member scopes found
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/errorModel'
-  '/api/v1/scopes/development/{courseId}/{projectId}/{memberId}':
+                $ref: "#/components/schemas/errorModel"
+  "/api/v1/scopes/development/{courseId}/{projectId}/{memberId}":
     get:
-      description: 'Asks for a member scope from a given courseId, projectId and memberId'
+      description: "Asks for a member scope from a given courseId, projectId and memberId"
       operationId: getMember
       parameters:
         - name: courseId
@@ -142,81 +192,81 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Member scope found
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/errorModel'
-  '/api/v1/scopes/development/search':
+                $ref: "#/components/schemas/errorModel"
+  "/api/v1/scopes/development/search":
     post:
       description: Search from a given SLA scope
       operationId: searchScope
       responses:
-        '200':
+        "200":
           description: Successful search
-        '404':
+        "404":
           description: Not Found
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/errorModel'
+                $ref: "#/components/schemas/errorModel"
       requestBody:
         x-name: scope
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/scope'
+              $ref: "#/components/schemas/scope"
         description: Scope to search
         required: true
-  '/api/v1/scopes/development/generate':
+  "/api/v1/scopes/development/generate":
     post:
       description: Generate scopes from a given github list of projects
       operationId: generateScope
       responses:
-        '200':
+        "200":
           description: Successful generation
-        '500':
+        "500":
           description: Internal Error
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/errorModel'
+                $ref: "#/components/schemas/errorModel"
       requestBody:
         x-name: scope
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/scope'
+              $ref: "#/components/schemas/scope"
         description: Scope to search
         required: true
-  '/api/v1/scopes/development/check':
+  "/api/v1/scopes/development/check":
     post:
       description: Check info.yml from a given github list of projects
       operationId: checkInfo
       responses:
-        '200':
+        "200":
           description: Successful check
-        '500':
+        "500":
           description: Internal Error
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/errorModel'
+                $ref: "#/components/schemas/errorModel"
       requestBody:
         x-name: scope
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/scope'
+              $ref: "#/components/schemas/scope"
         description: Scope to search
         required: true
 components:
@@ -233,4 +283,6 @@ components:
         message:
           type: string
     scope:
+      type: object
+    class:
       type: object
