@@ -23,7 +23,6 @@ const init = () => {
       authorizedTokens = JSON.parse(
         mustache.render(data, process.env, {}, ["$_[", "]"])
       );
-      console.log(authorizedTokens);
       logger.info("Successfully loaded authorized keys.");
     }
   });
@@ -158,7 +157,7 @@ const createClass = (newClass) => {
       } else {
         scopeObject.development.push(newClass);
         logger.info("Adding new course and updating scopes.");
-        //putScopes();
+        putScopes();
         return 201;
       }
     }
@@ -183,7 +182,7 @@ const putCourse = (courseId, course_updated) => {
       scopeObject.development[courseIndex] = course;
 
       logger.info("Updating course and scopes.");
-      //putScopes(); 
+      putScopes(); 
       return 200; 
     }
   } catch (err) {
