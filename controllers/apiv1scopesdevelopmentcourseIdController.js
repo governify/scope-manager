@@ -8,4 +8,4 @@ module.exports.getCourse = function getCourse (req, res, next) {
 
 module.exports.putCourse = function putCourse (req, res, next) {
   varapiv1scopesdevelopmentcourseIdController.putCourse(req.swagger.params, res, next);
-}
+};

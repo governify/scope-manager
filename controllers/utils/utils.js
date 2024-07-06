@@ -1,41 +1,41 @@
-"use strict";
+'use strict';
 
-const fs = require("fs");
-const mustache = require("mustache");
+const fs = require('fs');
+const mustache = require('mustache');
 mustache.escape = function (text) {
   return text;
 };
-const governify = require("governify-commons");
-const logger = governify.getLogger().tag("utils");
-const CryptoJS = require("crypto-js");
+const governify = require('governify-commons');
+const logger = governify.getLogger().tag('utils');
+const CryptoJS = require('crypto-js');
 
-const scopesGenerator = require("./scopesGenerator");
+const scopesGenerator = require('./scopesGenerator');
 
 let scopeObject;
 let authorizedTokens;
 
 // Scope management
 const init = () => {
-  fs.readFile("./configurations/authKeys.json", "utf-8", (err, data) => {
+  fs.readFile('./configurations/authKeys.json', 'utf-8', (err, data) => {
     if (err) {
       logger.error(err);
     } else {
       authorizedTokens = JSON.parse(
-        mustache.render(data, process.env, {}, ["$_[", "]"])
+        mustache.render(data, process.env, {}, ['$_[', ']'])
       );
-      logger.info("Successfully loaded authorized keys.");
+      logger.info('Successfully loaded authorized keys.');
     }
   });
 
   if (process.env.KEY_ASSETS_MANAGER_PRIVATE) {
     fetchScopes().catch(logger.error);
   } else {
-    logger.warn("Working without Assets Manager (Missing key).");
-    fs.readFile("./configurations/scopes.json", (err, data) => {
+    logger.warn('Working without Assets Manager (Missing key).');
+    fs.readFile('./configurations/scopes.json', (err, data) => {
       if (err) {
         logger.error(err);
       } else {
-        logger.info("Successfully loaded scopes from configurations file.");
+        logger.info('Successfully loaded scopes from configurations file.');
         scopeObject = JSON.parse(data);
       }
     });
@@ -44,30 +44,30 @@ const init = () => {
 
 const fetchScopes = () => {
   return new Promise((resolve, reject) => {
-    logger.info("Trying to fetch scopes.json file from assets.");
+    logger.info('Trying to fetch scopes.json file from assets.');
     governify.infrastructure
-      .getService("internal.assets")
-      .get("/api/v1/private/scope-manager/scopes.json", {
+      .getService('internal.assets')
+      .get('/api/v1/private/scope-manager/scopes.json', {
         params: {
-          private_key: process.env.KEY_ASSETS_MANAGER_PRIVATE,
-        },
+          private_key: process.env.KEY_ASSETS_MANAGER_PRIVATE
+        }
       })
       .then((response) => {
-        if (response.data === "File not found.") {
+        if (response.data === 'File not found.') {
           logger.error(
-            "Error: scopes.json file not found in Assets Manager. Retrying in 10s."
+            'Error: scopes.json file not found in Assets Manager. Retrying in 10s.'
           );
           setTimeout(() => {
             fetchScopes();
           }, 10000);
         } else {
-          logger.info("Successfully retrieved scopes from Assets Manager.");
+          logger.info('Successfully retrieved scopes from Assets Manager.');
           scopeObject = response.data;
         }
       })
       .catch((err) => {
         logger.error(
-          "Error when retrieving scopes from Assets Manager. Retrying in 5s.",
+          'Error when retrieving scopes from Assets Manager. Retrying in 5s.',
           err.message
         );
         setTimeout(() => {
@@ -81,14 +81,14 @@ const putScopes = (attempt = 1) => {
   return new Promise((resolve, reject) => {
     logger.info(`Attempt ${attempt}: Trying to PUT scopes.json file to assets.`);
     governify.infrastructure
-      .getService("internal.assets")
-      .put("/api/v1/private/scope-manager/scopes.json", JSON.stringify(scopeObject, null, 2), {
+      .getService('internal.assets')
+      .put('/api/v1/private/scope-manager/scopes.json', JSON.stringify(scopeObject, null, 2), {
         params: {
-          private_key: process.env.KEY_ASSETS_MANAGER_PRIVATE,
-        },
+          private_key: process.env.KEY_ASSETS_MANAGER_PRIVATE
+        }
       })
       .then((response) => {
-        logger.info("Successfully saved scopes to Assets Manager.");
+        logger.info('Successfully saved scopes to Assets Manager.');
         resolve();
       })
       .catch((err) => {
@@ -105,7 +105,6 @@ const putScopes = (attempt = 1) => {
   });
 };
 
-
 const setCourseScope = (courseScope, courseId) => {
   let found = false;
   for (const courseIndex in scopeObject.development) {
@@ -120,20 +119,20 @@ const setCourseScope = (courseScope, courseId) => {
   //! found && scopeObject.development.push(courseScope);
 
   if (!found) {
-    logger.warn("Course does not exist!");
+    logger.warn('Course does not exist!');
   }
 
   if (process.env.KEY_ASSETS_MANAGER_PRIVATE) {
-    //putScopes();
+    // putScopes();
   } else {
     logger.warn(
-      "Working without Assets Manager (Missing URL/key). Saving Scopes locally."
+      'Working without Assets Manager (Missing URL/key). Saving Scopes locally.'
     );
     fs.writeFileSync(
-      "./configurations/scopes.json",
+      './configurations/scopes.json',
       JSON.stringify(scopeObject)
     );
-    logger.info("Successfully saved scopes to configurations file.");
+    logger.info('Successfully saved scopes to configurations file.');
   }
 };
 
@@ -142,8 +141,8 @@ const getCourses = () => {
   try {
     return scopeObject.development;
   } catch (err) {
-    logger.error("Internal error", err);
-    return "error";
+    logger.error('Internal error', err);
+    return 'error';
   }
 };
 
@@ -156,42 +155,40 @@ const createClass = (newClass) => {
         return 409;
       } else {
         scopeObject.development.push(newClass);
-        logger.info("Adding new course and updating scopes.");
+        logger.info('Adding new course and updating scopes.');
         putScopes();
         return 201;
       }
     }
   } catch (err) {
-    logger.error("Internal error", JSON.stringify(err));
-    return "error";
+    logger.error('Internal error', JSON.stringify(err));
+    return 'error';
   }
 };
 
-const putCourse = (courseId, course_updated) => {
+const putCourse = (courseId, courseUpdated) => {
   try {
     const courseIndex = scopeObject.development.findIndex((course) => courseId === course.classId);
     if (courseIndex === -1) {
-      return 404; 
+      return 404;
     } else {
       const course = scopeObject.development[courseIndex];
-    
-      course.templateId = course_updated.templateId ?? course.templateId;
-      course.autoRun = course_updated.autoRun ?? course.autoRun;
-      course.hidden = course_updated.hidden ?? course.hidden;
-      course.joinCode = course_updated.joinCode ?? course.joinCode;
+
+      course.templateId = courseUpdated.templateId ?? course.templateId;
+      course.autoRun = courseUpdated.autoRun ?? course.autoRun;
+      course.hidden = courseUpdated.hidden ?? course.hidden;
+      course.joinCode = courseUpdated.joinCode ?? course.joinCode;
       scopeObject.development[courseIndex] = course;
 
-      logger.info("Updating course and scopes.");
-      putScopes(); 
-      return 200; 
+      logger.info('Updating course and scopes.');
+      putScopes();
+      return 200;
     }
   } catch (err) {
-    logger.error("Internal error", JSON.stringify(err));
-    return "error";
+    logger.error('Internal error', JSON.stringify(err));
+    return 'error';
   }
 };
-
-
 
 const getCourse = (courseId) => {
   try {
@@ -202,8 +199,8 @@ const getCourse = (courseId) => {
     }
     return undefined;
   } catch (err) {
-    logger.error("Internal error", err);
-    return "error";
+    logger.error('Internal error', err);
+    return 'error';
   }
 };
 
@@ -216,8 +213,8 @@ const getProjects = (courseId) => {
       return undefined;
     }
   } catch (err) {
-    logger.error("Internal error", err);
-    return "error";
+    logger.error('Internal error', err);
+    return 'error';
   }
 };
 
@@ -233,8 +230,8 @@ const getProject = (courseId, projectId) => {
     }
     return undefined;
   } catch (err) {
-    logger.error("Internal error", err);
-    return "error";
+    logger.error('Internal error', err);
+    return 'error';
   }
 };
 
@@ -247,8 +244,8 @@ const getMembers = (courseId, projectId) => {
       return undefined;
     }
   } catch (err) {
-    logger.error("Internal error", err);
-    return "error";
+    logger.error('Internal error', err);
+    return 'error';
   }
 };
 
@@ -264,8 +261,8 @@ const getMember = (courseId, projectId, memberId) => {
     }
     return undefined;
   } catch (err) {
-    logger.error("Internal error", err);
-    return "error";
+    logger.error('Internal error', err);
+    return 'error';
   }
 };
 
@@ -301,8 +298,8 @@ const searchScope = (scope) => {
       return getCourses();
     }
   } catch (err) {
-    logger.error("Internal error", err);
-    return "error";
+    logger.error('Internal error', err);
+    return 'error';
   }
 };
 
@@ -311,8 +308,8 @@ const getCoursesUnauth = () => {
   try {
     return trimUnauthData([...getCourses()]);
   } catch (err) {
-    logger.error("Internal error", err);
-    return "error";
+    logger.error('Internal error', err);
+    return 'error';
   }
 };
 
@@ -325,8 +322,8 @@ const getCourseUnauth = (courseId) => {
     }
     return undefined;
   } catch (err) {
-    logger.error("Internal error", err);
-    return "error";
+    logger.error('Internal error', err);
+    return 'error';
   }
 };
 
@@ -339,8 +336,8 @@ const getProjectsUnauth = (courseId) => {
       return undefined;
     }
   } catch (err) {
-    logger.error("Internal error", err);
-    return "error";
+    logger.error('Internal error', err);
+    return 'error';
   }
 };
 
@@ -356,8 +353,8 @@ const getProjectUnauth = (courseId, projectId) => {
     }
     return undefined;
   } catch (err) {
-    logger.error("Internal error", err);
-    return "error";
+    logger.error('Internal error', err);
+    return 'error';
   }
 };
 
@@ -370,8 +367,8 @@ const getMembersUnauth = (courseId, projectId) => {
       return undefined;
     }
   } catch (err) {
-    logger.error("Internal error", err);
-    return "error";
+    logger.error('Internal error', err);
+    return 'error';
   }
 };
 
@@ -387,8 +384,8 @@ const getMemberUnauth = (courseId, projectId, memberId) => {
     }
     return undefined;
   } catch (err) {
-    logger.error("Internal error", err);
-    return "error";
+    logger.error('Internal error', err);
+    return 'error';
   }
 };
 
@@ -408,7 +405,7 @@ const trimUnauthData = (scopeToFilter) => {
           try {
             identities.push({ source: identityItem.source });
           } catch (err) {
-            logger.error("No source for this identity:", identityItem);
+            logger.error('No source for this identity:', identityItem);
           }
         }
         project.identities = [...identities];
@@ -427,8 +424,8 @@ const trimUnauthData = (scopeToFilter) => {
 
     return classes;
   } catch (err) {
-    logger.error("Problem when trimming data");
-    return "error";
+    logger.error('Problem when trimming data');
+    return 'error';
   }
 };
 
@@ -436,7 +433,7 @@ const isAuthorized = (token) => {
   try {
     return authorizedTokens.includes(token);
   } catch (err) {
-    logger.error("Authentication error", err);
+    logger.error('Authentication error', err);
     return false;
   }
 };
@@ -444,8 +441,8 @@ const isAuthorized = (token) => {
 // Scope generator
 
 const checkInfoYml = (infoYml) => {
-  if (infoYml.name === "Wizard") return scopesGenerator.checkFromJson(infoYml);
-  if (!infoYml.repoList.some((val) => val.includes("gitlab.com"))) {
+  if (infoYml.name === 'Wizard') return scopesGenerator.checkFromJson(infoYml);
+  if (!infoYml.repoList.some((val) => val.includes('gitlab.com'))) {
     return scopesGenerator.checkFromGithubList(infoYml);
   } else {
     return scopesGenerator.checkFromGitLabList(infoYml);
@@ -453,7 +450,7 @@ const checkInfoYml = (infoYml) => {
 };
 
 const generateScope = (generationRequest) => {
-  if (!generationRequest.repoList.some((val) => val.includes("gitlab.com"))) {
+  if (!generationRequest.repoList.some((val) => val.includes('gitlab.com'))) {
     return scopesGenerator.generateFromGithubList(generationRequest);
   } else {
     return scopesGenerator.generateFromGitLabList(generationRequest);
@@ -463,39 +460,39 @@ const generateScope = (generationRequest) => {
 // Other methods
 const sendHelper = (res, scope) => {
   if (scope) {
-    if (scope !== "error") {
+    if (scope !== 'error') {
       res.send({
         code: 200,
-        message: "Scope returned",
-        scope: scope,
+        message: 'Scope returned',
+        scope: scope
       });
     } else {
       res.send({
         code: 500,
-        message: "Internal error",
+        message: 'Internal error'
       });
     }
   } else {
     res.send({
       code: 404,
-      message: "Scope not found",
-      scope: undefined,
+      message: 'Scope not found',
+      scope: undefined
     });
   }
 };
 
-const sendHelper2 = (res, content, code, contentName = "scope") => {
+const sendHelper2 = (res, content, code, contentName = 'scope') => {
   if (code === 200) {
     const sendObject = {
       code: code,
-      message: contentName + " returned",
+      message: contentName + ' returned'
     };
     sendObject[contentName] = content;
     res.send(sendObject);
   } else {
     res.send({
       code: code,
-      message: content,
+      message: content
     });
   }
 };

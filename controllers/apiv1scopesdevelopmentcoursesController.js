@@ -9,4 +9,3 @@ module.exports.getCourses = function getCourses (req, res, next) {
 module.exports.createClass = function createClass (req, res, next) {
   varapiv1scopesdevelopmentcoursesController.createClass(req.body, res, next);
 };
-
