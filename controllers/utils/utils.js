@@ -82,7 +82,7 @@ const putScopes = (attempt = 1) => {
     logger.info(`Attempt ${attempt}: Trying to PUT scopes.json file to assets.`);
     governify.infrastructure
       .getService('internal.assets')
-      .put('/api/v1/private/scope-manager/scopes.json', JSON.stringify(scopeObject, null, 2), {
+      .put('/api/v1/private/scope-manager/scopes.json', scopeObject, {
         params: {
           private_key: process.env.KEY_ASSETS_MANAGER_PRIVATE
         }
@@ -123,7 +123,7 @@ const setCourseScope = (courseScope, courseId) => {
   }
 
   if (process.env.KEY_ASSETS_MANAGER_PRIVATE) {
-    // putScopes();
+    putScopes();
   } else {
     logger.warn(
       'Working without Assets Manager (Missing URL/key). Saving Scopes locally.'
@@ -146,15 +146,15 @@ const getCourses = () => {
   }
 };
 
-const createClass = (newClass) => {
+const createCourse = (newCourse) => {
   try {
-    if (!newClass.classId) {
+    if (!newCourse.classId) {
       return 400;
     } else {
-      if (scopeObject.development.some((course) => course.classId === newClass.classId)) {
+      if (scopeObject.development.some((course) => course.classId === newCourse.classId)) {
         return 409;
       } else {
-        scopeObject.development.push(newClass);
+        scopeObject.development.push(newCourse);
         logger.info('Adding new course and updating scopes.');
         putScopes();
         return 201;
@@ -508,7 +508,7 @@ exports.setCourseScope = setCourseScope;
 
 exports.getCourses = getCourses;
 exports.getCourse = getCourse;
-exports.createClass = createClass;
+exports.createCourse = createCourse;
 exports.putCourse = putCourse;
 exports.getProjects = getProjects;
 exports.getProject = getProject;
