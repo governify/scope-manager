@@ -28,7 +28,7 @@ paths:
                 $ref: "#/components/schemas/errorModel"
     post:
       description: Creates a new course
-      operationId: createClass
+      operationId: createCourse
       requestBody:  
         x-name: course_object
         description: Course object
