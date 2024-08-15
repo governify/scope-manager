@@ -12,10 +12,10 @@ module.exports.getCourses = function getCourses (req, res, next) {
   utils.sendHelper(res, scope);
 };
 
-module.exports.createClass = function createClass (req, res, next) {
+module.exports.createCourse = function createCourse (req, res, next) {
   let response;
   if (utils.isAuthorized(res.req.headers.authorization)) {
-    response = utils.createClass(req);
+    response = utils.createCourse(req);
     if (response === 201) {
       res.send({
         code: 201,
