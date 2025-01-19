@@ -174,10 +174,9 @@ const putCourse = (courseId, courseUpdated) => {
     } else {
       const course = scopeObject.development[courseIndex];
 
-      course.templateId = courseUpdated.templateId ?? course.templateId;
-      course.autoRun = courseUpdated.autoRun ?? course.autoRun;
-      course.hidden = courseUpdated.hidden ?? course.hidden;
-      course.joinCode = courseUpdated.joinCode ?? course.joinCode;
+      Object.keys(courseUpdated).forEach((key) => {
+        course[key] = courseUpdated[key];
+      });
       scopeObject.development[courseIndex] = course;
 
       logger.info('Updating course and scopes.');
