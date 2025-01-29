@@ -494,7 +494,6 @@ const generateFromGithubList = (generationRequest) => {
             // Generate a random 6-character hexadecimal string to ensure noone can guess the project id
             const hash = crypto.createHash('md5').update(githubOwner + githubRepo).digest('hex').substring(0, 6);
 
-
             infoJson.projectId = courseId + '-GH-' + githubOwner + '_' + githubRepo + '_' + hash;
 
             // Add notifications
