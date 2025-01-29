@@ -3,6 +3,7 @@ const governify = require('governify-commons');
 const logger = governify.getLogger().tag('scopes-generator');
 
 const utils = require('./utils');
+const crypto = require('crypto');
 
 const githubRawUrl = 'https://raw.githubusercontent.com/';
 
@@ -490,8 +491,11 @@ const generateFromGithubList = (generationRequest) => {
 
             const githubOwner = project.projectURL.split('github.com/')[1].split('/')[0];
             const githubRepo = project.projectURL.split('github.com/')[1].split('/')[1];
+            // Generate a random 6-character hexadecimal string to ensure noone can guess the project id
+            const hash = crypto.createHash('md5').update(githubOwner + githubRepo).digest('hex').substring(0, 6);
 
-            infoJson.projectId = courseId + '-GH-' + githubOwner + '_' + githubRepo;
+
+            infoJson.projectId = courseId + '-GH-' + githubOwner + '_' + githubRepo + '_' + hash;
 
             // Add notifications
             const notifications = {};
