@@ -542,6 +542,8 @@ const generateFromGithubList = (generationRequest) => {
                   identityObject.projectId = pivotalUrlSplit[pivotalUrlSplit.length - 1];
                 } else if (key === 'heroku') {
                   identityObject.projectId = value.split('://')[1].split('.')[0];
+                } else if (key === 'zenhub') {
+                  identityObject.workspaceId = value.workspaceId;
                 }
                 identities.push(identityObject);
               }
